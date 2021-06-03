@@ -1,10 +1,10 @@
 /*
  * @Date: 2021-06-02 18:14:09
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-03 11:10:56
+ * @LastEditTime: 2021-06-03 11:59:18
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\createPolyline.ts
  */
-import { Viewer, ScreenSpaceEventHandler, Cartesian3, Cartesian2, ScreenSpaceEventType, Ray, defined, PolylineGraphics, CallbackProperty, Color, PolygonGeometry
+import { Viewer, ScreenSpaceEventHandler, Cartesian3, Cartesian2, ScreenSpaceEventType, Ray, defined, CallbackProperty, Color
  } from 'cesium'
 import Entity from 'cesium/Source/DataSources/Entity';
 
@@ -12,7 +12,7 @@ export default class DrawPolyline {
   private _objId: number;
   private _viewer: Viewer;
   private _handler: ScreenSpaceEventHandler;
-  private _polyline: object|undefined;
+  private _polyline: Entity|undefined;
   private _positions: Cartesian3[];
 
   constructor(viewer: Viewer) {
@@ -23,10 +23,10 @@ export default class DrawPolyline {
     this._positions = [];
   }
 
-  startCreate() {
+  startCreate():void {
     let $this:this = this;
     this._handler.setInputAction(Event => {
-      let cartesian:Cartesian3|undefined = $this.getCatesian3FromPX(Event.position);
+      const cartesian:Cartesian3|undefined = $this.getCatesian3FromPX(Event.position);
       if(!cartesian) {
         throw new Error("鼠标获取坐标点失败！");
       }
@@ -38,7 +38,7 @@ export default class DrawPolyline {
     }, ScreenSpaceEventType.LEFT_CLICK)
 
     this._handler.setInputAction(Event => {
-      let cartesian = $this.getCatesian3FromPX(Event.endPosition)
+      const cartesian = $this.getCatesian3FromPX(Event.endPosition)
       if(!$this._positions.length || !cartesian) {
         return;
       }
@@ -52,6 +52,7 @@ export default class DrawPolyline {
 			}
       console.log('Event :>> ', Event); 
     }, ScreenSpaceEventType.MOUSE_MOVE)
+    return
   }
   /**
    * @description: 将pick到的Cartesian2坐标转化为Cartesian3
@@ -60,12 +61,12 @@ export default class DrawPolyline {
    */  
   getCatesian3FromPX(px:Cartesian2):Cartesian3|undefined {
     let cartesian:Cartesian3|undefined;
-    let ray:Ray = this._viewer.camera.getPickRay(px);
+    const ray:Ray = this._viewer.camera.getPickRay(px);
     cartesian = this._viewer.scene.globe.pick(ray, this._viewer.scene);
     return cartesian
   }
   createPolyline():Entity {
-    let $this:this = this;
+    const $this:this = this;
     return this._viewer.entities.add({
       polyline: {
         positions: new CallbackProperty(() => $this._positions, false),
