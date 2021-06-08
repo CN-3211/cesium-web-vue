@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 18:14:09
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-03 11:59:18
+ * @LastEditTime: 2021-06-05 11:51:37
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\createPolyline.ts
  */
 import { Viewer, ScreenSpaceEventHandler, Cartesian3, Cartesian2, ScreenSpaceEventType, Ray, defined, CallbackProperty, Color
@@ -9,23 +9,21 @@ import { Viewer, ScreenSpaceEventHandler, Cartesian3, Cartesian2, ScreenSpaceEve
 import Entity from 'cesium/Source/DataSources/Entity';
 
 export default class DrawPolyline {
-  private _objId: number;
-  private _viewer: Viewer;
-  private _handler: ScreenSpaceEventHandler;
-  private _polyline: Entity|undefined;
-  private _positions: Cartesian3[];
+  static _viewer: Viewer;
+  static _handler: ScreenSpaceEventHandler;
+  static _polyline: Entity|undefined;
+  _positions: Cartesian3[];
 
   constructor(viewer: Viewer) {
-    this._objId = Number((new Date()).getTime() + "" + Number(Math.random() * 1000).toFixed(0));
-    this._viewer = viewer;
-    this._handler = new ScreenSpaceEventHandler(this._viewer.scene.canvas);
-    this._polyline = undefined;
+    DrawPolyline._viewer = viewer;
+    DrawPolyline._handler = new ScreenSpaceEventHandler(DrawPolyline._viewer.scene.canvas);
+    DrawPolyline._polyline = undefined;
     this._positions = [];
   }
 
-  startCreate():void {
-    let $this:this = this;
-    this._handler.setInputAction(Event => {
+  startCreate(callback?: (params: Cartesian3[]) => void): void {
+    const $this:this = this;
+    DrawPolyline._handler.setInputAction(Event => {
       const cartesian:Cartesian3|undefined = $this.getCatesian3FromPX(Event.position);
       if(!cartesian) {
         throw new Error("鼠标获取坐标点失败！");
@@ -37,37 +35,44 @@ export default class DrawPolyline {
       $this._positions.push(cartesian);
     }, ScreenSpaceEventType.LEFT_CLICK)
 
-    this._handler.setInputAction(Event => {
+    DrawPolyline._handler.setInputAction(Event => {
       const cartesian = $this.getCatesian3FromPX(Event.endPosition)
       if(!$this._positions.length || !cartesian) {
         return;
       }
-      if($this._positions.length === 2 && !defined($this._polyline)) {
-        $this._polyline = $this.createPolyline();
-        console.log('$this._polyline :>> ', $this._polyline);
+      if($this._positions.length === 2 && !defined(DrawPolyline._polyline)) {
+        DrawPolyline._polyline = $this.createPolyline();
       }
-      if ($this._polyline) {
+      if (DrawPolyline._polyline) {
 				$this._positions.pop();
 				$this._positions.push(cartesian);
 			}
-      console.log('Event :>> ', Event); 
     }, ScreenSpaceEventType.MOUSE_MOVE)
-    return
+    DrawPolyline._handler.setInputAction(Event => {
+      const cartesian = $this.getCatesian3FromPX(Event.position);
+      if(!cartesian) {
+        throw new Error("鼠标获取坐标点失败！");
+      }
+      DrawPolyline._handler.destroy();
+      $this._positions.pop();
+      $this._positions.push(cartesian);
+      callback && callback($this._positions);
+    }, ScreenSpaceEventType.RIGHT_CLICK)
+    return;
   }
   /**
    * @description: 将pick到的Cartesian2坐标转化为Cartesian3
    * @param {Cartesian2} px
    * @return {Cartesian3} cartesian
-   */  
+   */
   getCatesian3FromPX(px:Cartesian2):Cartesian3|undefined {
-    let cartesian:Cartesian3|undefined;
-    const ray:Ray = this._viewer.camera.getPickRay(px);
-    cartesian = this._viewer.scene.globe.pick(ray, this._viewer.scene);
+    const ray:Ray = DrawPolyline._viewer.camera.getPickRay(px);
+    const cartesian:Cartesian3|undefined = DrawPolyline._viewer.scene.globe.pick(ray, DrawPolyline._viewer.scene);
     return cartesian
   }
   createPolyline():Entity {
     const $this:this = this;
-    return this._viewer.entities.add({
+    return DrawPolyline._viewer.entities.add({
       polyline: {
         positions: new CallbackProperty(() => $this._positions, false),
         material: Color.YELLOW,
@@ -76,5 +81,12 @@ export default class DrawPolyline {
         clampToGround: true
       }
     })
+  }
+  destroy():void {
+    if(DrawPolyline._polyline) {
+      DrawPolyline._viewer.entities.remove(DrawPolyline._polyline);
+      this._positions =[];
+    }
+    return
   }
 }

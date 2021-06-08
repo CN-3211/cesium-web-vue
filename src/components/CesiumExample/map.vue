@@ -1,35 +1,86 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-03 11:03:10
+ * @LastEditTime: 2021-06-08 16:31:48
  * @FilePath: \cesium-web-vue\src\components\CesiumExample\map.vue
 -->
 <template>
   <div class="map-box">
     <div id="cesiumContainer"></div>
+    <div class="btn" @click="doDraw">点击绘制</div>
+    <div class="btn2" @click="doClear">点击清除</div>
   </div>
 </template>
 
-<script> 
-import DrawPolyline from '@/utils/vue-utils/draw/createPolyline';
+<script lang="ts">
+import { reactive, onMounted } from 'vue';
+
+import DrawPolyline from "@/utils/vue-utils/draw/createPolyline";
 import { Viewer } from "cesium";
 export default {
-  name: "", 
-  mounted() {
-    let viewer = new Viewer("cesiumContainer");
-    let aaa = new DrawPolyline(viewer);
-    aaa.startCreate()
-    console.log('aaa :>> ', aaa);
+  // setup返回值应该怎么定义类型
+  setup() {
+    let viewer:Viewer;
+    let DrawPolylineIns:DrawPolyline|undefined;
+
+    const state = reactive({
+      
+    });
+    onMounted(() => {
+      viewer = new Viewer("cesiumContainer")
+      console.log('123 :>> ', 123);
+    })
+
+    const doDraw = ():void => {
+      if(DrawPolylineIns) {
+        console.log("正在绘制！");
+        return;
+      }
+      DrawPolylineIns = new DrawPolyline(viewer);
+      DrawPolylineIns.startCreate()
+    }
+
+    const doClear = () => {
+      if(DrawPolylineIns) {
+        DrawPolylineIns.destroy()
+      }
+      DrawPolylineIns = undefined;
+    }
+
+    return {
+      doDraw,
+      doClear
+    }
   }
 };
-</script> 
-<style scoped>
-  .map-box{
+</script>
+<style lang="scss" scoped>
+.map-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  
+  #cesiumContainer {
     width: 100%;
     height: 100%;
   }
-  #cesiumContainer{
-    width: 100%;
-    height: 100%;
+
+  .btn, .btn2 {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 80px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    background-color: rgba(255, 0, 0, 0.8);
+    border-radius: 25px;
+    border: 1px white;
   }
+  .btn2 {
+    top: 45px;
+  }
+}
 </style>
