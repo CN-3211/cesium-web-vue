@@ -1,11 +1,11 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-08 16:31:48
+ * @LastEditTime: 2021-06-08 16:40:12
  * @FilePath: \cesium-web-vue\src\components\CesiumExample\map.vue
 -->
 <template>
-  <div class="map-box">
+  <div class="draw">
     <div id="cesiumContainer"></div>
     <div class="btn" @click="doDraw">点击绘制</div>
     <div class="btn2" @click="doClear">点击清除</div>
@@ -55,7 +55,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.map-box {
+.draw {
   width: 100%;
   height: 100%;
   position: relative;
