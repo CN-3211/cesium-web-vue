@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    // lang="ts"的script标签中引入JS报错解决方案
+    "noImplicitAny": false,
     "target": "esnext",
     "module": "esnext",
     "strict": true,
