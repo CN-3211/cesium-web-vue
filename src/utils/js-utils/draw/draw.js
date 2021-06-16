@@ -1,13 +1,13 @@
 /*
  * @Date: 2021-04-25 19:21:27
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-05-31 09:32:58
- * @FilePath: \zpVC\src\tools\es6Draw\draw.js
+ * @LastEditTime: 2021-06-11 11:03:29
+ * @FilePath: \cesium-web-vue\src\utils\js-utils\draw\draw.js
  */
 import DrawBillboard from './CreateBillboard.js'
 import DrawPolyline from './CreatePolyline.js'
 import DrawPolygon from './CreatePolygon.js'
-import TerrainClipPlan from './TerrainClipPlan.js'
+import TerrainClipPlan from './TerrainClipPlan.js.js'
 import MaterialImg from '@/assets/mark.png'
 
 function DrawHandler(arg) {
