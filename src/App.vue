@@ -1,14 +1,15 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-08 16:56:43
+ * @LastEditTime: 2021-06-16 10:01:15
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
   <div id="layout">
     <div id="nav">
       <router-link to="/">Draw</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/Transform3Dtiles">Transform3Dtiles</router-link> |
+      <router-link to="/clipModel">ClipModel</router-link> |
     </div>
     <router-view />
   </div>

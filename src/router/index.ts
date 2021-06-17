@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-11 10:57:26
+ * @LastEditTime: 2021-06-16 09:59:42
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -14,12 +14,20 @@ const routes: Array<RouteRecordRaw> = [
     component: Draw
   },
   {
-    path: '/about',
-    name: 'About',
+    path: '/transform3Dtiles',
+    name: 'Transform3Dtiles',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/transform3Dtiles.vue')
+  },
+  {
+    path: '/clipModel',
+    name: 'ClipModel',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/clipModel.vue')
   },
   {
     path: '/test',
