@@ -1,11 +1,13 @@
 <!--
  * @Date: 2021-06-05 14:02:53
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-18 10:22:49
- * @FilePath: \cesium-web-vue\src\components\viewer\viewer.vue
+ * @LastEditTime: 2021-06-18 11:02:04
+ * @FilePath: \cesium-web-vue\src\components\viewer\hViewer.vue
 -->
 <template>
-  <div :id="props.id" class="viewer" ></div>
+  <div :id="props.id" class="h-viewer" >
+    <slot></slot>
+  </div>
 </template>
 
 <script lang="ts">
@@ -37,7 +39,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.viewer {
+.h-viewer {
   width: 100%;
   height: 100%;
   cursor: auto !important;
