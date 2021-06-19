@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-08 16:40:12
- * @FilePath: \cesium-web-vue\src\components\CesiumExample\map.vue
+ * @LastEditTime: 2021-06-17 19:24:36
+ * @FilePath: \cesium-web-vue\src\views\draw.vue
 -->
 <template>
   <div class="draw">
@@ -28,7 +28,6 @@ export default {
     });
     onMounted(() => {
       viewer = new Viewer("cesiumContainer")
-      console.log('123 :>> ', 123);
     })
 
     const doDraw = ():void => {

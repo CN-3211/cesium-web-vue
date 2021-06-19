@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-11 20:37:36
+ * @LastEditTime: 2021-06-19 11:54:00
  * @FilePath: \cesium-web-vue\src\views\transform3Dtiles.vue
 -->
 <template>
@@ -89,7 +89,7 @@ import {
   Cesium3DTileset,
   Rectangle,
 } from "cesium";
-import transform from "../utils/vue-utils/transform/transform";
+import transform from "@/utils/vue-utils/transform/transform";
 import DrawPolygon from '@/utils/js-utils/draw/CreatePolygon';
 import TerrainClipPlan from '@/utils/js-utils/terrainClip/TerrainClipPlan';
 import createWorldTerrain from 'cesium/Source/Core/createWorldTerrain';
