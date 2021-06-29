@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-10 09:13:02
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-16 08:45:38
+ * @LastEditTime: 2021-06-29 09:08:12
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\transform\transform.ts
  */
 import * as Cesium from 'cesium'
@@ -17,7 +17,14 @@ export default class transform {
     transform.modelMatrix = modelMatrix;
 
   }
-  translation(lng:number, lat:number, height:number) {
+  /**
+   * @description: 平移
+   * @param {number} lng 目标经度
+   * @param {number} lat 目标维度
+   * @param {number} height 目标高度
+   * @return {Cesium.Matrix4} Matrix4矩阵
+   */  
+  translation(lng:number, lat:number, height:number):Cesium.Matrix4 {
     const cartographic:Cesium.Cartographic = Cesium.Cartographic.fromCartesian(
       transform.boundingSphereCenter
     );
@@ -42,7 +49,14 @@ export default class transform {
     );
   }
   
-  rotation(xAngle: number, yAngle:number, zAngle:number) {
+  /**
+   * @description: 旋转
+   * @param {number} xAngle 右手坐标系的x, y, z坐标
+   * @param {number} yAngle
+   * @param {number} zAngle
+   * @return {Cesium.Matrix4} 变换后的旋转矩阵
+   */  
+  rotation(xAngle: number, yAngle:number, zAngle:number):Cesium.Matrix4 {
     const mx: Cesium.Matrix3 = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(xAngle));
     const my: Cesium.Matrix3 = Cesium.Matrix3.fromRotationY(Cesium.Math.toRadians(yAngle));
     const mz: Cesium.Matrix3 = Cesium.Matrix3.fromRotationZ(Cesium.Math.toRadians(zAngle));

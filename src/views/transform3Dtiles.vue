@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-19 11:54:00
+ * @LastEditTime: 2021-06-25 15:08:52
  * @FilePath: \cesium-web-vue\src\views\transform3Dtiles.vue
 -->
 <template>
@@ -120,8 +120,8 @@ export default {
       // viewer.extend(viewerCesium3DTilesInspectorMixin);
       tileset = viewer.scene.primitives.add(
         new Cesium3DTileset({
-          url: "3DTiles/north/tileset.json",
-          // url: "3DTiles/tileset/tileset.json",
+          // url: "3DTiles/stratum/tileset.json",
+          url: "3DTiles/tileset/tileset.json",
         })
       );
       
