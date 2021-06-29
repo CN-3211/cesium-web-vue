@@ -1,0 +1,35 @@
+newmtl material_18
+       Ka 0.952941 1 0.607843 1
+       Kd 0.952941 1 0.607843 1
+       Ks 0 0 0 0
+
+newmtl material_20
+       Ka 1 0.2 1 1
+       Kd 1 0.2 1 1
+       Ks 0 0 0 0
+
+newmtl material_22
+       Ka 1 0.25098 0.0980392 1
+       Kd 1 0.25098 0.0980392 1
+       Ks 0 0 0 0
+
+newmtl material_21
+       Ka 1 0.298039 0.4 1
+       Kd 1 0.298039 0.4 1
+       Ks 0 0 0 0
+
+newmtl material_19
+       Ka 1 0.6 1 1
+       Kd 1 0.6 1 1
+       Ks 0 0 0 0
+
+newmtl material_17
+       Ka 1 1 0.670588 1
+       Kd 1 1 0.670588 1
+       Ks 0 0 0 0
+
+newmtl material_16
+       Ka 1 1 0.866667 1
+       Kd 1 1 0.866667 1
+       Ks 0 0 0 0
+
