@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-29 09:54:41
+ * @LastEditTime: 2021-06-30 20:15:01
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -10,6 +10,7 @@
       <router-link to="/">Draw</router-link> |
       <router-link to="/Transform3Dtiles">Transform3Dtiles</router-link> |
       <router-link to="/clipModel">ClipModel</router-link> |
+      <router-link to="/threeJsClipObjModelStencil">threeJsClipObjModelStencil</router-link> |
       <router-link to="/test">test</router-link> |
     </div>
     <router-view />
