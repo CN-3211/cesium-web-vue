@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-06-03 11:36:41
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-03 16:36:09
- * @FilePath: \cesium-webpack\webpack.config.js
+ * @LastEditTime: 2021-07-10 10:59:51
+ * @FilePath: \cesium-web-vue\extern-projects\cesium-webpack\webpack.config.js
  */
 const path = require('path');
 
@@ -13,11 +13,12 @@ const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 
 const CopywebpackPlugin = require('copy-webpack-plugin');
+console.log(path.resolve(__dirname, 'dist'))
 
 module.exports = {
   context: __dirname,
   entry: {
-    app: './src/index.js'
+    app: './src/index.js' // app对应打包好js文件的名字
   },
   output: {
     filename: '[name].js',
@@ -27,7 +28,18 @@ module.exports = {
   },
   module: {
     rules: [{
+      test: /\.js$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          // 配置加载器选项
+          presets: ['@babel/preset-env']
+        }
+      }
+    },{
       test: /\.css$/,
+      // 加载器（loader）的顺序是从右到左，从下到上，需要先加载css-loader再加载style-loader
       use: ['style-loader', 'css-loader']
     }, {
       test: /\.(png|gif|jpg|jpeg|svg|xml|json)$/,

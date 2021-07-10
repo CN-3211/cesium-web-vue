@@ -6,11 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node_modules/.bin/webpack --config webpack.config.js",
-    "start": "node_modules/.bin/webpack server --config webpack.config.js --open"
+    "start": "node_modules/.bin/webpack server --mode development --config webpack.config.js --open"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "babel-loader": "^8.2.2",
     "cesium": "^1.82.1",
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^5.2.6",
