@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-07-05 09:49:35
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-06 11:59:18
+ * @LastEditTime: 2021-07-10 15:44:52
  * @FilePath: \cesium-web-vue\extern-projects\webGL-practice\lesson07\11_HelloCube.js
  */
 
@@ -46,7 +46,7 @@ window.onload = () => {
   const mvpMatrix = new Matrix4();
 
 
-  modelMatrix.setTranslate(0.75, 0, 0);
+  modelMatrix.setTranslate(0, 0, 0);
   viewMatrix.setLookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
   projMatrix.setPerspective(30, canvas.width / canvas.height, 1, 100);
 
