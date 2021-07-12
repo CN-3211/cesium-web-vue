@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-29 09:47:26
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-07 16:29:04
+ * @LastEditTime: 2021-07-12 14:51:37
  * @FilePath: \cesium-web-vue\src\views\test01.vue
 -->
 <template>
@@ -11,9 +11,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, onMounted } from "vue";
-import { pageload } from './test01_script/combine.ts';
+import { pageload } from './test01_script/combine';
 
 export default defineComponent({
   setup() {

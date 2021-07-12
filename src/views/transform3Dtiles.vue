@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-25 15:08:52
+ * @LastEditTime: 2021-07-12 14:49:13
  * @FilePath: \cesium-web-vue\src\views\transform3Dtiles.vue
 -->
 <template>
@@ -79,7 +79,7 @@
 </template>
 
 <script lang="ts">
-import { reactive, onMounted } from "vue";
+import { reactive, onMounted, defineComponent } from "vue";
 
 import {
   Matrix4,
@@ -93,14 +93,13 @@ import transform from "@/utils/vue-utils/transform/transform";
 import DrawPolygon from '@/utils/js-utils/draw/CreatePolygon';
 import TerrainClipPlan from '@/utils/js-utils/terrainClip/TerrainClipPlan';
 import createWorldTerrain from 'cesium/Source/Core/createWorldTerrain';
-import viewerCesium3DTilesInspectorMixin from 'cesium/Source/Widgets/Viewer/viewerCesium3DTilesInspectorMixin';
 
 let tileset: Cesium3DTileset;
 let boundingSphereCenter: Cartesian3;
 let modelMatrix: Matrix4;
 let viewer: Viewer
 
-export default {
+export default defineComponent({
   // setup返回值应该怎么定义类型
   setup() {
     const state = reactive({
@@ -184,7 +183,7 @@ export default {
       onDraw
     };
   },
-};
+});
 </script>
 <style lang="scss" scoped>
 .clip-Model {
