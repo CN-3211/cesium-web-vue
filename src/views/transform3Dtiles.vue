@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-12 14:49:13
+ * @LastEditTime: 2021-07-13 20:54:58
  * @FilePath: \cesium-web-vue\src\views\transform3Dtiles.vue
 -->
 <template>
@@ -108,7 +108,7 @@ export default defineComponent({
       rotateZ: 0,
       lng: 109.3062,
       lat: 21.66081,
-      height: -500
+      height: 500
     });
 
     onMounted(() => {

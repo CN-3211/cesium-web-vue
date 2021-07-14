@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-25 16:47:39
- * @FilePath: \cesium-web-vue\src\views\clipModel.vue
+ * @LastEditTime: 2021-07-12 15:56:28
+ * @FilePath: \cesium-web-vue\src\views\clipModel3.vue
 -->
 <template>
   <div class="clip-Model">
@@ -11,7 +11,7 @@
       <div class="slip">
         <span class="demonstration">Y轴裁剪</span>
         <el-slider
-          v-model="state.targetZ"
+          v-model="state.targetTop"
           :min="-180"
           :max="180"
           :show-input="true"
@@ -60,7 +60,7 @@ export default {
 
       // 鼠标左键down获取plane实体并且改变plane样式
       const mouseDownHandler: Cesium.ScreenSpaceEventHandler = createHandler(
-        viewer,
+        viewer.scene.canvas,
         (event) => {
           const pickedPlan: pickedObject = viewer.scene.pick(event.position);
           console.log("pickedPlan :>> ", pickedPlan);
@@ -83,7 +83,7 @@ export default {
 
       // 鼠标左键up恢复样式并将selectedPlane置为undefined
       const mouseUpHandler: Cesium.ScreenSpaceEventHandler = createHandler(
-        viewer,
+        viewer.scene.canvas,
         () => {
           if (Cesium.defined(selectedPlane)) {
             selectedPlane.material = Cesium.Color.WHITE.withAlpha(0.8);
@@ -96,7 +96,7 @@ export default {
       );
 
       const mouseMoveHandler: Cesium.ScreenSpaceEventHandler = createHandler(
-        viewer,
+        viewer.scene.canvas,
         (event) => {
           if (Cesium.defined(selectedPlane)) {
             console.log('selectedPlaneEntity :>> ', selectedPlaneEntity.name);
