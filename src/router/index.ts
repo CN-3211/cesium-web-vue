@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-06 19:24:46
+ * @LastEditTime: 2021-07-13 20:37:28
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -9,7 +9,7 @@ import Draw from '@/views/draw.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
+    path: '/draw',
     name: 'Draw',
     component: Draw
   },
@@ -24,33 +24,26 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/clipModel',
     name: 'ClipModel',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/clipModel.vue')
   },
   {
     path: '/threeJsClipObjModelStencil',
-    name: 'threeJsClipObjModelStencil',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
+    name: 'ThreeJsClipObjModelStencil',
     component: () => import(/* webpackChunkName: "about" */ '../views/threeJsClipObjModelStencil.vue')
   },
   {
     path: '/combineThreeAndCesium',
     name: 'combineThreeAndCesium',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/combineThreeAndCesium.vue')
+  },
+  {
+    path: '/sandCameraTutorial',
+    name: 'SandCameraTutorial',
+    component: () => import(/* webpackChunkName: "about" */ '../views/test01.vue')
   },
   {
     path: '/test',
     name: 'test',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/test01.vue')
   }
 ]

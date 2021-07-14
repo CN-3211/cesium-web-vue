@@ -1,22 +1,81 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-07 16:36:57
+ * @LastEditTime: 2021-07-13 20:40:26
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
-  <div id="layout">
-    <div id="nav">
-      <router-link to="/">Draw</router-link> |
-      <router-link to="/Transform3Dtiles">Transform3Dtiles</router-link> |
-      <router-link to="/clipModel">ClipModel</router-link> |
-      <router-link to="/threeJsClipObjModelStencil">threeJsClipObjModelStencil</router-link> |
-      <router-link to="/combineThreeAndCesium">combineThreeAndCesium</router-link> |
-      <router-link to="/test">test</router-link> |
-    </div>
-    <router-view />
+  <div id="app">
+    <el-container class="EContainer">
+      <el-aside>
+        <el-menu :default-openeds="['1', '3']" :router="true">
+          <el-submenu index="1">
+            <template #title>
+              <i class="el-icon-menu"></i>cesium功能
+            </template>
+            <el-menu-item-group>
+              <template #title>3D tiles</template>
+              <el-menu-item index="/transform3Dtiles">平移旋转变换</el-menu-item>
+              <el-menu-item index="/clipModel">模型裁剪</el-menu-item>
+            </el-menu-item-group>
+            <el-menu-item-group title="基础功能">
+              <el-menu-item index="/draw">画点线面</el-menu-item>
+            </el-menu-item-group>
+          </el-submenu>
+          <el-submenu index="2">
+            <template #title>
+              <i class="el-icon-menu"></i>Cesium沙盒学习
+            </template>
+            <el-menu-item-group>
+              <template #title>camera相关</template>
+              <el-menu-item index="/sandCameraTutorial">camera tutorial</el-menu-item>
+              <el-menu-item index="2-2">选项2</el-menu-item>
+            </el-menu-item-group>
+          </el-submenu>
+          <el-submenu index="3">
+            <template #title>
+              <i class="el-icon-menu"></i>threeJS功能学习
+            </template>
+            <el-menu-item-group>
+              <template #title>分组一</template>
+              <el-menu-item index="/combineThreeAndCesium">整合three和Cesium</el-menu-item>
+              <el-menu-item index="/threeJsClipObjModelStencil">模板缓冲剖切</el-menu-item>
+            </el-menu-item-group>
+          </el-submenu>
+          
+          <el-menu-item index="/test"><i class="el-icon-s-tools"></i>test</el-menu-item>
+        </el-menu>
+      </el-aside>
+
+      <!-- 右侧视图开始 -->
+      <el-container class="EInnerContainer">
+        <!-- <el-header>
+        </el-header> -->
+        <el-main>
+          <router-view />
+        </el-main>
+      </el-container>
+    </el-container>
+    <!-- 右侧视图结束 -->
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent, reactive } from "vue";
+
+export default defineComponent({
+  setup() {
+    const item = {
+      date: '2016-05-02',
+      name: '王小虎',
+      address: '上海市普陀区金沙江路 1518 弄'
+    };
+    return {
+      tableData: Array(20).fill(item)
+    }
+  }
+})
+</script>
 
 <style lang="scss">
 #app {
@@ -27,25 +86,22 @@
   color: #2c3e50;
   height: 100%;
   width: 100%;
-  #nav {
-    padding: 30px;
-    height: 20px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    a {
-      font-weight: bold;
-      color: #2c3e50;
-
-      &.router-link-exact-active {
-        color: #42b983;
+  .EContainer {
+    width: 100%;
+    height: 100%;
+    .el-aside {
+      border-right: solid 1px #e6e6e6;
+      .el-menu {
+        border: none;
+        text-align: left;
       }
     }
+    .EInnerContainer {
+      .el-header {
+        border-bottom: solid 1px #e6e6e6;
+      }
+    }
+    
   }
-}
-#layout {
-  height: 100%;
-  padding-top: 80px;
-  box-sizing: border-box;
 }
 </style>
