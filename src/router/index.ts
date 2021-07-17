@@ -1,18 +1,14 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-13 20:37:28
+ * @LastEditTime: 2021-07-17 11:28:49
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import Draw from '@/views/draw.vue'
+import Draw from '@/views/draw.vue';
 
 const routes: Array<RouteRecordRaw> = [
-  {
-    path: '/draw',
-    name: 'Draw',
-    component: Draw
-  },
+  { path: '/draw', name: 'Draw', component: Draw },
   {
     path: '/transform3Dtiles',
     name: 'Transform3Dtiles',
@@ -35,11 +31,15 @@ const routes: Array<RouteRecordRaw> = [
     path: '/combineThreeAndCesium',
     name: 'combineThreeAndCesium',
     component: () => import(/* webpackChunkName: "about" */ '../views/combineThreeAndCesium.vue')
+  },{
+    path: "/sandCameraTutorial",
+    name: "SandCameraTutorial",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCameraTutorial.vue')
   },
   {
-    path: '/sandCameraTutorial',
-    name: 'SandCameraTutorial',
-    component: () => import(/* webpackChunkName: "about" */ '../views/test01.vue')
+    path: "/cardboard",
+    name: "cardboard",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/cardboard.vue')
   },
   {
     path: '/test',

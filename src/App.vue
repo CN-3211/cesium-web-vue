@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-13 20:40:26
+ * @LastEditTime: 2021-07-17 11:29:12
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -29,7 +29,7 @@
             <el-menu-item-group>
               <template #title>camera相关</template>
               <el-menu-item index="/sandCameraTutorial">camera tutorial</el-menu-item>
-              <el-menu-item index="2-2">选项2</el-menu-item>
+              <el-menu-item index="/cardboard">cardboard</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="3">
@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   setup() {
