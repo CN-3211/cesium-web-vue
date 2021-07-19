@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-29 09:47:26
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-17 11:29:59
- * @FilePath: \cesium-web-vue\src\views\sandcastleExample\cardBoard.vue
+ * @LastEditTime: 2021-07-17 17:59:57
+ * @FilePath: \cesium-web-vue\src\views\sandcastleExample\sandCardboard.vue
 -->
 <template>
   <div class="cardboard">
@@ -72,11 +72,18 @@ class configModels {
     });
     return entity
   }
+
+  /**
+   * @description: 配置模型绕圆运动
+   * @param {*}
+   * @return {Cesium.SampledPositionProperty} [SPProperty]
+   */  
   private static moveRoute(): Cesium.SampledPositionProperty {
     const SPProperty = new Cesium.SampledPositionProperty();
     let time: Cesium.JulianDate;
     let position: Cesium.Cartesian3;
     let radians: number;
+    // 初始方向角度为0，每次旋转固定45度，直至360度旋转一圈
     for (let i = 0; i <= 360; i += 45) {
       radians = Cesium.Math.toRadians(i);
       time = Cesium.JulianDate.addSeconds(
@@ -84,6 +91,7 @@ class configModels {
         i,
         new Cesium.JulianDate()
       );
+      // 每次旋转45度，模型所经过的距离在此计算，其中0.05为距离常量，值越大圆的范围越大
       configModels.modelPosition.lng += Math.cos(radians) * 0.05;
       configModels.modelPosition.lat += Math.sin(radians) * 0.05;
       position = Cesium.Cartesian3.fromDegrees(
@@ -108,6 +116,7 @@ class configModels {
     camera.up = new Cesium.Cartesian3(0.0, 0.0, 1.0);
     camera.right = new Cesium.Cartesian3(0.0, -1.0, 0.0);
 
+    // scene更新或者渲染结束后执行
     viewer.scene.postUpdate.addEventListener((scene: Cesium.Scene, time: Cesium.JulianDate) => {
       const modelPosition = entity.position?.getValue(time);
       if(!modelPosition) { throw new Error("modelPosition不存在"); }

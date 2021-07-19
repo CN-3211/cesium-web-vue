@@ -1,14 +1,14 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-17 11:29:12
+ * @LastEditTime: 2021-07-19 09:58:18
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
   <div id="app">
     <el-container class="EContainer">
       <el-aside>
-        <el-menu :default-openeds="['1', '3']" :router="true">
+        <el-menu :default-openeds="['1', '2', '3']" :router="true">
           <el-submenu index="1">
             <template #title>
               <i class="el-icon-menu"></i>cesium功能
@@ -29,7 +29,11 @@
             <el-menu-item-group>
               <template #title>camera相关</template>
               <el-menu-item index="/sandCameraTutorial">camera tutorial</el-menu-item>
-              <el-menu-item index="/cardboard">cardboard</el-menu-item>
+              <el-menu-item index="/sandCardboard">cardboard</el-menu-item>
+            </el-menu-item-group>
+            <el-menu-item-group>
+              <template #title>未分类</template>
+              <el-menu-item index="/sandCartographicLimitRectangle">Cartographic Limit Rectangle</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="3">

@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-29 09:47:26
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-13 20:39:38
+ * @LastEditTime: 2021-07-17 15:44:35
  * @FilePath: \cesium-web-vue\src\views\sandcastleExample\sandCameraTutorial.vue
 -->
 <template>
@@ -69,6 +69,12 @@ class interaction {
     }
     interaction.onClockTick(viewer)
   }
+
+  /**
+   * @description: 获取用户输入的keyboard案件，并触发对应move事件
+   * @param {*}
+   * @return {*}
+   */  
   private static keyboardAction() {
     document.addEventListener('keydown', event => {
       const keyType = interaction.getKeyType(event.code);
@@ -101,6 +107,12 @@ class interaction {
         break;
     }
   }
+
+  /**
+   * @description: 获取用户鼠标在canvas上的运动，根据Cartesian2坐标的变化来触发lookUp和lookRight事件
+   * @param {*} canvas
+   * @return {*}
+   */  
   private static mouseAction(canvas: HTMLCanvasElement) {
     let startPosition: Cesium.Cartesian2;
     let currentPosition: Cesium.Cartesian2;

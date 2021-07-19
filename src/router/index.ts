@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-17 11:28:49
+ * @LastEditTime: 2021-07-19 09:57:20
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -37,9 +37,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCameraTutorial.vue')
   },
   {
-    path: "/cardboard",
-    name: "cardboard",
-    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/cardboard.vue')
+    path: "/sandCardboard",
+    name: "sandCardboard",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCardboard.vue')
+  },
+  {
+    path: "/sandCartographicLimitRectangle",
+    name: "sandCartographicLimitRectangle",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCartographicLimitRectangle.vue')
   },
   {
     path: '/test',
