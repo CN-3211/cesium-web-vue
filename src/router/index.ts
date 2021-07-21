@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-19 09:57:20
+ * @LastEditTime: 2021-07-21 09:56:06
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -45,6 +45,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/sandCartographicLimitRectangle",
     name: "sandCartographicLimitRectangle",
     component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCartographicLimitRectangle.vue')
+  },
+  {
+    path: "/sandClampTo3DTiles",
+    name: "sandClampTo3DTiles",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandClampTo3DTiles.vue')
   },
   {
     path: '/test',

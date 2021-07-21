@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-19 09:58:18
+ * @LastEditTime: 2021-07-21 09:44:28
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -34,6 +34,7 @@
             <el-menu-item-group>
               <template #title>未分类</template>
               <el-menu-item index="/sandCartographicLimitRectangle">Cartographic Limit Rectangle</el-menu-item>
+              <el-menu-item index="/sandClampTo3DTiles">Clamp To 3D Tiles</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="3">
