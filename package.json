@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "3d-tiles-renderer": "^0.2.11",
     "core-js": "^3.6.5",
     "element-plus": "^1.0.2-beta.46",
     "three": "^0.129.0",
