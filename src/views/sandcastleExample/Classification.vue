@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-29 09:47:26
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-23 14:29:36
+ * @LastEditTime: 2021-07-23 21:23:19
  * @FilePath: \cesium-web-vue\src\views\sandcastleExample\Classification.vue
 -->
 <template>
@@ -38,21 +38,6 @@ interface native_config extends base_Config {
 }
 interface processed_config extends base_Config {
   modelMatrix: Cesium.Matrix4
-}
-
-const primitiveConfig: native_config = {
-  center: new Cesium.Cartesian3(1216389.3637977627, -4736323.641980423, 4081321.7428341154),
-  hpr: new Cesium.HeadingPitchRoll(2.619728786416368, 0.0, 0.0),
-  translate: new Cesium.Cartesian3(0.0, 0.0, -2.0),
-  geometry: Cesium.BoxGeometry.fromDimensions({
-    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
-    dimensions: new Cesium.Cartesian3(8.0, 5.0, 8.0),
-  }),
-  attributes: {
-    color: Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(1.0, 0.0, 0.0, 0.5)),
-    show: new Cesium.ShowGeometryInstanceAttribute(true)
-  },
-  id: "building"
 }
 
 const PRIMITIVECONFIGS: native_config[] = [

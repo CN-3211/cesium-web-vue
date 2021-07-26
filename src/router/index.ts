@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-23 14:28:52
+ * @LastEditTime: 2021-07-26 12:26:37
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -55,6 +55,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/sand/classification",
     name: "sandClassification",
     component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/Classification.vue')
+  },
+  {
+    path: "/sand/Clustering",
+    name: "sandClustering",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/Clustering.vue')
   },
   {
     path: "/load3DTiles",

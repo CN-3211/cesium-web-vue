@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-17 19:24:36
+ * @LastEditTime: 2021-07-26 10:17:40
  * @FilePath: \cesium-web-vue\src\views\draw.vue
 -->
 <template>
@@ -16,18 +16,21 @@
 import { reactive, onMounted } from 'vue';
 
 import DrawPolyline from "@/utils/vue-utils/draw/createPolyline";
-import { Viewer } from "cesium";
+import * as Cesium from 'cesium';
+import { createHandler } from '@/utils/c-utils';
 export default {
   // setup返回值应该怎么定义类型
   setup() {
-    let viewer:Viewer;
+    let viewer:Cesium.Viewer;
     let DrawPolylineIns:DrawPolyline|undefined;
 
     const state = reactive({
       
     });
     onMounted(() => {
-      viewer = new Viewer("cesiumContainer")
+      viewer = new Cesium.Viewer("cesiumContainer", {
+        terrainProvider: Cesium.createWorldTerrain()
+      })
     })
 
     const doDraw = ():void => {
