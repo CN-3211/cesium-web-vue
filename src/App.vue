@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-26 12:41:17
+ * @LastEditTime: 2021-07-26 19:25:28
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -37,6 +37,7 @@
               <el-menu-item index="/sandClampTo3DTiles">Clamp To 3D Tiles</el-menu-item>
               <el-menu-item index="/sand/classification">Classification</el-menu-item>
               <el-menu-item index="/sand/Clustering">Clustering</el-menu-item>
+              <el-menu-item index="/sand/CustomDataSource">CustomDataSource</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="3">
