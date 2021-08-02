@@ -1,28 +1,30 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-26 10:17:40
+ * @LastEditTime: 2021-08-02 21:14:51
  * @FilePath: \cesium-web-vue\src\views\draw.vue
 -->
 <template>
   <div class="draw">
     <div id="cesiumContainer"></div>
-    <div class="btn" @click="doDraw">点击绘制</div>
-    <div class="btn2" @click="doClear">点击清除</div>
+    <div class="btn" @click="drawPolyline">绘制线</div>
+    <div class="btn2" @click="clearPolyline">清除线</div>
+    <div class="btn3" @click="drawPolygon">绘制面</div>
+    <div class="btn4" @click="clearPolygon">清除面</div>
   </div>
 </template>
 
 <script lang="ts">
 import { reactive, onMounted } from 'vue';
 
-import DrawPolyline from "@/utils/vue-utils/draw/createPolyline";
+import { DrawPolyline, DrawPolygon } from "@/utils/vue-utils/draw/drawUtils";
 import * as Cesium from 'cesium';
-import { createHandler } from '@/utils/c-utils';
 export default {
   // setup返回值应该怎么定义类型
   setup() {
     let viewer:Cesium.Viewer;
     let DrawPolylineIns:DrawPolyline|undefined;
+    let DrawPolygonIns:DrawPolygon|undefined;
 
     const state = reactive({
       
@@ -33,25 +35,35 @@ export default {
       })
     })
 
-    const doDraw = ():void => {
-      if(DrawPolylineIns) {
-        console.log("正在绘制！");
-        return;
-      }
+    const drawPolyline = ():void => {
       DrawPolylineIns = new DrawPolyline(viewer);
       DrawPolylineIns.startCreate()
     }
 
-    const doClear = () => {
+    const clearPolyline = () => {
       if(DrawPolylineIns) {
         DrawPolylineIns.destroy()
       }
       DrawPolylineIns = undefined;
     }
 
+    const drawPolygon = ():void => {
+      DrawPolygonIns = new DrawPolygon(viewer);
+      DrawPolygonIns.startCreate()
+    }
+
+    const clearPolygon = () => {
+      if(DrawPolygonIns) {
+        DrawPolygonIns.destroy()
+      }
+      DrawPolygonIns = undefined;
+    }
+
     return {
-      doDraw,
-      doClear
+      drawPolyline,
+      clearPolyline,
+      drawPolygon,
+      clearPolygon
     }
   }
 };
@@ -67,7 +79,7 @@ export default {
     height: 100%;
   }
 
-  .btn, .btn2 {
+  .btn, .btn2, .btn3, .btn4 {
     position: absolute;
     top: 10px;
     left: 10px;
@@ -83,6 +95,12 @@ export default {
   }
   .btn2 {
     top: 45px;
+  }
+  .btn3 {
+    top: 80px;
+  }
+  .btn4 {
+    top: 115px;
   }
 }
 </style>

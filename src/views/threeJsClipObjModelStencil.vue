@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-30 17:10:50
+ * @LastEditTime: 2021-08-02 10:04:30
  * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
 -->
 <template>
@@ -188,8 +188,7 @@ class handModels {
           child.renderOrder = 6; // ??
         }
       });
-
-      // this.objectGroup.add(layerModel);
+      this.objectGroup.add(layerModel);
 
       const planeGeom = new THREE.PlaneBufferGeometry(1, 1);
       const poGroup: THREE.Group = new THREE.Group();
