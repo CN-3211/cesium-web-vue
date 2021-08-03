@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-26 19:25:03
+ * @LastEditTime: 2021-08-03 20:57:00
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -32,27 +32,27 @@ const routes: Array<RouteRecordRaw> = [
     name: 'combineThreeAndCesium',
     component: () => import(/* webpackChunkName: "about" */ '../views/combineThreeAndCesium.vue')
   },{
-    path: "/sandCameraTutorial",
+    path: "/sand/CameraTutorial",
     name: "SandCameraTutorial",
-    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCameraTutorial.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/CameraTutorial.vue')
   },
   {
-    path: "/sandCardboard",
+    path: "/sand/Cardboard",
     name: "sandCardboard",
-    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCardboard.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/Cardboard.vue')
   },
   {
-    path: "/sandCartographicLimitRectangle",
+    path: "/sand/CartographicLimitRectangle",
     name: "sandCartographicLimitRectangle",
-    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandCartographicLimitRectangle.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/CartographicLimitRectangle.vue')
   },
   {
-    path: "/sandClampTo3DTiles",
+    path: "/sand/ClampTo3DTiles",
     name: "sandClampTo3DTiles",
-    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/sandClampTo3DTiles.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/ClampTo3DTiles.vue')
   },
   {
-    path: "/sand/classification",
+    path: "/sand/Classification",
     name: "sandClassification",
     component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/Classification.vue')
   },

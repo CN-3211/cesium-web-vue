@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-26 19:25:28
+ * @LastEditTime: 2021-08-03 20:58:00
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -28,13 +28,13 @@
             </template>
             <el-menu-item-group>
               <template #title>camera相关</template>
-              <el-menu-item index="/sandCameraTutorial">camera tutorial</el-menu-item>
-              <el-menu-item index="/sandCardboard">cardboard</el-menu-item>
+              <el-menu-item index="/sand/CameraTutorial">camera tutorial</el-menu-item>
+              <el-menu-item index="/sand/Cardboard">cardboard</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group>
               <template #title>未分类</template>
-              <el-menu-item index="/sandCartographicLimitRectangle">Cartographic Limit Rectangle</el-menu-item>
-              <el-menu-item index="/sandClampTo3DTiles">Clamp To 3D Tiles</el-menu-item>
+              <el-menu-item index="/sand/CartographicLimitRectangle">Cartographic Limit Rectangle</el-menu-item>
+              <el-menu-item index="/sand/ClampTo3DTiles">Clamp To 3D Tiles</el-menu-item>
               <el-menu-item index="/sand/classification">Classification</el-menu-item>
               <el-menu-item index="/sand/Clustering">Clustering</el-menu-item>
               <el-menu-item index="/sand/CustomDataSource">CustomDataSource</el-menu-item>
