@@ -1,35 +1,47 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-04 11:28:35
+ * @LastEditTime: 2021-08-07 14:13:01
  * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
 -->
 <template>
   <div class="threeJsClipObjModelStencil" id="threeJsClipObjModelStencil">
     <div class="controlGroup">
-      <div class="block">
-        <span class="demonstration">X平面距离</span>
-        <el-slider v-model="distance.x" :min="-1" :max="1" :step="0.001" @input="onSlideX"></el-slider>
-      </div>
-      <div class="block">
-        <span class="demonstration">Y平面距离</span>
-        <el-slider v-model="distance.y" :min="-1" :max="1" :step="0.001" @input="onSlideY"></el-slider>
-      </div>
-      <div class="block">
-        <span class="demonstration">Z平面距离</span>
-        <el-slider v-model="distance.z" :min="-1" :max="1" :step="0.001" @input="onSlideZ"></el-slider>
-      </div>
+      <el-tabs type="border-card" @tab-click="onTabClicked">
+        <el-tab-pane v-for="tab in tabs" :key="tab" :label="tab">
+          <div v-show="tab === '切面展示'">
+            <div class="checkboxGroup">
+              <el-checkbox v-model="isClipMutual" label="不同切面直接是否相互剪切" @change="onClipMutual"></el-checkbox>
+            </div>
+          </div>
+          <div class="threeClip" v-show="tab === '三面裁剪'">
+            <span class="spanText">切面取反：</span>
+            <div class="checkboxGroup">
+              <el-checkbox v-model="negated.x" label="x面" @change="() => onNegatedChange(0)"></el-checkbox>
+              <el-checkbox v-model="negated.y" label="y面" @change="() => onNegatedChange(1)"></el-checkbox>
+              <el-checkbox v-model="negated.z" label="z面" @change="() => onNegatedChange(2)"></el-checkbox>
+            </div>
+          </div>
+          <div>
+            <span class="demonstration">X平面距离</span>
+            <el-slider v-model="distance.x" :min="-1" :max="1" :step="0.001" @input="onSlideX"></el-slider>
+            <span class="demonstration">Y平面距离</span>
+            <el-slider v-model="distance.y" :min="-1" :max="1" :step="0.001" @input="onSlideY"></el-slider>
+            <span class="demonstration">Z平面距离</span>
+            <el-slider v-model="distance.z" :min="-1" :max="1" :step="0.001" @input="onSlideZ"></el-slider>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
   </div>
 </template>
 <script lang="ts">
 // #region
-import { defineComponent, onMounted, reactive } from "vue";
+import { defineComponent, onMounted, reactive, ref } from "vue";
 
 import * as THREE from "three";
-import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import stencilClip from '@/views/stencilClip';
 const distance = reactive({
   x: 0,
   y: 0,
@@ -58,36 +70,53 @@ const modelNameArr = [
   "g孤石",
 ];
 
-let planes: THREE.Plane[][] = [[], [], []];
-for (let i = 0; i < modelNameArr.length; i++) {
-  planes[0].push(new THREE.Plane(new THREE.Vector3(-1, 0, 0), distance.x));
-  planes[1].push(new THREE.Plane(new THREE.Vector3(0, -1, 0), distance.y));
-  planes[2].push(new THREE.Plane(new THREE.Vector3(0, 0, -1), distance.y));
-}
-const planeObjects: THREE.Mesh[][] = [ [], [], [] ];
+
+let stencilClipIns: stencilClip; 
 
 export default defineComponent({
   setup() {
+    const tabs = ref(["三面裁剪", "切面展示", "自定义切割"]);
+    const negated = reactive({
+      x: false,
+      y: false,
+      z: false
+    })
+    const isClipMutual = ref(false);
+    
     onMounted(async () => {
       await init();
       animate();
     });
     const onSlideX = () => {
-      planes[0].forEach(item => {
+      stencilClipIns.planes[0].forEach(item => {
         item.constant = distance.x;
       })
     }
     const onSlideY = () => {
-      planes[1].forEach(item => {
+      stencilClipIns.planes[1].forEach(item => {
         item.constant = distance.y;
       })
     }
     const onSlideZ = () => {
-      planes[2].forEach(item => {
+      stencilClipIns.planes[2].forEach(item => {
         item.constant = distance.z;
       })
     }
-    return { distance, onSlideX, onSlideY, onSlideZ }
+    const onNegatedChange = (planIndex) => {
+      console.log('planIndex :>> ', planIndex);
+      stencilClipIns.planes[planIndex].forEach(item => item.negate());
+    }
+    const onTabClicked = (vm) => {
+      console.log('name :>> ', vm.props.label);
+      if(vm.props.label === '切面展示') {
+        stencilClipIns && stencilClipIns.changeShowType("切面展示");
+      }
+    }
+    const onClipMutual = (mutualed) => {
+      stencilClipIns && stencilClipIns.changeClippingPlaneShowModel(mutualed);
+      console.log('mutualed :>> ', mutualed);
+    }
+    return { distance, onSlideX, onSlideY, onSlideZ, tabs, negated, onNegatedChange, onClipMutual, isClipMutual, onTabClicked }
   },
 });
 
@@ -124,8 +153,8 @@ async function init(): Promise<void> {
   const axisHelper = new THREE.AxesHelper(250);
   scene.add(axisHelper);
 
-  const handModel = new handModels(scene);
-  await handModel.loadModels(scene)
+  stencilClipIns = new stencilClip(scene, modelNameArr, "obj/分层地层切割模型/", { negateX: true, negateY: false, negateZ: false, onlyShowPlans: false, clipEachOther: true });
+  await stencilClipIns.loadModels();
 
   // render配置
   renderer = new THREE.WebGLRenderer();
@@ -150,155 +179,8 @@ async function init(): Promise<void> {
 
 function animate(): void {
   requestAnimationFrame(animate);
-  for (let x = 0; x < planes.length; x++) {
-    for (let i = 0; i < modelNameArr.length; i++) {
-      let plane = planes[x][i];
-      let po = planeObjects[x][i];
-
-      plane.coplanarPoint(po.position);
-
-      // mesh.lookAt起什么作用
-      po.lookAt(
-        po.position.x - plane.normal.x,
-        po.position.y - plane.normal.y,
-        po.position.z - plane.normal.z
-      );
-    }
-  }
-  
+  stencilClipIns.lookAtPlane();
   renderer.render(scene, camera);
-}
-
-class handModels {
-  objectGroup = new THREE.Group();
-  constructor(scene: THREE.Scene) {
-    scene.add(this.objectGroup);
-  }
-  async loadModels(scene: THREE.Scene) {
-    
-    const objAndMtls: any[] = [];
-
-    for (let i = 0; i < modelNameArr.length; i++) {
-      const item = modelNameArr[i];
-      const mtl = await new MTLLoader()
-        .setPath("obj/分层地层切割模型/")
-        .loadAsync(`${item}.mtl`);
-      const obj = await new OBJLoader()
-        .setMaterials(mtl)
-        .setPath("obj/分层地层切割模型/")
-        .loadAsync(`${item}.obj`);
-      obj.scale.set(0.001, 0.001, 0.001);
-      objAndMtls.push({
-        obj,
-        mtl,
-      });
-    }
-
-    let clippingPlanes:THREE.Plane[] = []
-    planes.forEach(item => {
-      clippingPlanes = clippingPlanes.concat(item);
-    })
-    for (let x = 0; x < planes.length; x++) {
-      for (let i = 0; i < modelNameArr.length; i++) {
-        const layerModel = objAndMtls[i].obj;
-        layerModel.traverse((child: THREE.Object3D) => {
-          if (child instanceof THREE.Mesh) {
-            child.material.clippingPlanes = clippingPlanes;
-            child.castShadow = true; // ??
-            child.renderOrder = 6; // ??
-          }
-        });
-        this.objectGroup.add(layerModel);
-
-        const planeGeom = new THREE.PlaneBufferGeometry(1, 1);
-        const poGroup: THREE.Group = new THREE.Group();
-        const plane = planes[x][i];
-
-        layerModel.children.forEach((itemModel) => {
-          const _itemModel = itemModel as THREE.Mesh;
-          const geometry = _itemModel.geometry.clone();
-
-          const stencilGroup = this.createPlaneStencilGroup(
-            geometry,
-            plane,
-            i + 2.2
-          );
-          stencilGroup.scale.set(0.001, 0.001, 0.001);
-          this.objectGroup.add(stencilGroup);
-        });
-
-        let result: THREE.Plane[] = [];
-        planes.forEach((item, index) => {
-          if(index !== x) {
-            result = result.concat(item);
-          }
-        })
-        // plane会被其他clipping planes裁剪
-        const planeMat = new THREE.MeshStandardMaterial({
-          color: layerModel.children[0].material.color,
-          clippingPlanes: result,
-          stencilWrite: true,
-          stencilRef: 0,
-          stencilFunc: THREE.NotEqualStencilFunc,
-          stencilFail: THREE.ReplaceStencilOp,
-          stencilZFail: THREE.ReplaceStencilOp,
-          stencilZPass: THREE.ReplaceStencilOp,
-        });
-
-        const po = new THREE.Mesh(planeGeom, planeMat);
-        po.onAfterRender = (renderer) => {
-          renderer.clearStencil();
-        };
-        po.renderOrder = i + 1.2;
-        poGroup.add(po);
-        planeObjects[x].push(po);
-        scene.add(poGroup);
-      }
-    }
-  }
-  createPlaneStencilGroup(
-    layerModel: THREE.BufferGeometry,
-    plane: THREE.Plane,
-    renderOrder: number
-  ): THREE.Group {
-    const group: THREE.Group = new THREE.Group();
-    const baseMat: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial();
-    baseMat.depthWrite = false;
-    baseMat.depthTest = false;
-    baseMat.colorWrite = false;
-    baseMat.stencilWrite = true;
-    baseMat.stencilFunc = THREE.AlwaysStencilFunc;
-
-    //
-    const mat0 = baseMat.clone();
-    mat0.side = THREE.BackSide;
-    mat0.clippingPlanes = [plane];
-    // IncrementWrapStencilOp将当前stencil value增加1
-    mat0.stencilFunc = THREE.AlwaysStencilFunc;
-    mat0.stencilFail = THREE.IncrementWrapStencilOp;
-    mat0.stencilZFail = THREE.IncrementWrapStencilOp;
-    mat0.stencilZPass = THREE.IncrementWrapStencilOp;
-
-    const mesh0: THREE.Mesh = new THREE.Mesh(layerModel, mat0);
-    mesh0.renderOrder = renderOrder;
-    group.add(mesh0);
-
-    // front faces
-    const mat1 = baseMat.clone();
-    mat1.side = THREE.FrontSide;
-    mat1.clippingPlanes = [plane];
-    // DecrementWrapStencilOp将当前stencil value减少1
-    mat1.stencilFail = THREE.DecrementWrapStencilOp;
-    mat1.stencilZFail = THREE.DecrementWrapStencilOp;
-    mat1.stencilZPass = THREE.DecrementWrapStencilOp;
-
-    const mesh1 = new THREE.Mesh(layerModel, mat1);
-    mesh1.renderOrder = renderOrder;
-
-    group.add(mesh1);
-
-    return group;
-  }
 }
 </script>
 
@@ -309,15 +191,28 @@ class handModels {
   position: relative;
   .controlGroup {
     box-sizing: border-box;
-    width: 300px;
+    width: 328px;
     padding: 10px;
     border-radius: 3%;
     position: absolute;
     top: 30px;
     left: 10px;
     background-color: rgba($color: #FFFFFF, $alpha: 0.2);
-    .block {
-      color: #FFFFFF;
+    .el-tab-pane {
+      position: relative;
+      .threeClip {
+        .spanText {
+          position: absolute;
+          top: -2px;
+          left: 0;
+          width: 80px;
+          text-align: center;
+        }
+        .checkboxGroup {
+          padding-left: 80px;
+        }
+      }
+      
     }
   }
 }
