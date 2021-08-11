@@ -1,11 +1,12 @@
 /*
  * @Date: 2021-06-02 18:14:09
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-02 21:14:15
- * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\createPolyline.ts
+ * @LastEditTime: 2021-08-04 17:52:08
+ * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\drawUtils.ts
  */
 import { Viewer, ScreenSpaceEventHandler, Cartesian3, Cartesian2, ScreenSpaceEventType, Ray, defined, CallbackProperty, Color, Entity, PolygonHierarchy
  } from 'cesium'
+import Cesium3DTile from 'cesium/Source/Scene/Cesium3DTile';
 
 class DrawPolyline {
   static _viewer: Viewer;
@@ -99,7 +100,7 @@ class DrawPolygon {
     this.polyline = undefined;
     this.polygon = undefined;
   }
-  startCreate() {
+  startCreate(callback?) {
     /** 点击开始 **/
     this.handler.setInputAction(event => {
       const clickPosition = this.getCatesian3FromPX(event.position);
@@ -117,6 +118,7 @@ class DrawPolygon {
           this.positions.pop();
           this.positions.push(movePosition);
         } else {
+          this.positions.pop();
           this.positions.push(movePosition);
           this.createPolygon();
         }
@@ -138,7 +140,9 @@ class DrawPolygon {
       this.positions.pop();
       this.positions.push(rClickPosition);
       this.handler.destroy();
-      console.log('this.handler :>> ', this.handler.isDestroyed());
+      if(callback) {
+        callback(this.positions);
+      }
       this.polygon = undefined;
       this.polyline = undefined;
     }, ScreenSpaceEventType.RIGHT_CLICK)
@@ -181,6 +185,18 @@ class DrawPolygon {
       this.handler.destroy()
     }
     DrawPolygon._viewer.entities.removeAll();
+  }
+}
+
+class DrawOn3Dtiles {
+  static _viewer: Viewer
+  // handler: ScreenSpaceEventHandler
+  constructor(viewer) {
+    DrawOn3Dtiles._viewer = viewer;
+    
+  }
+  startCreate() {
+    console.log('111 :>> ', 111);
   }
 }
 

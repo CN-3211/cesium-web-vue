@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-03 20:58:00
+ * @LastEditTime: 2021-08-04 14:16:39
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -16,7 +16,7 @@
             <el-menu-item-group>
               <template #title>3D tiles</template>
               <el-menu-item index="/transform3Dtiles">平移旋转变换</el-menu-item>
-              <el-menu-item index="/clipModel">模型裁剪</el-menu-item>
+              <el-menu-item index="/digTerrian">地表挖掘</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="基础功能">
               <el-menu-item index="/draw">画点线面</el-menu-item>

@@ -1,16 +1,17 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-02 21:14:51
+ * @LastEditTime: 2021-08-06 20:25:59
  * @FilePath: \cesium-web-vue\src\views\draw.vue
 -->
 <template>
   <div class="draw">
     <div id="cesiumContainer"></div>
     <div class="btn" @click="drawPolyline">绘制线</div>
-    <div class="btn2" @click="clearPolyline">清除线</div>
-    <div class="btn3" @click="drawPolygon">绘制面</div>
-    <div class="btn4" @click="clearPolygon">清除面</div>
+    <!-- <div class="btn2" @click="clearPolyline">清除线</div> -->
+    <div class="btn2" @click="drawPolygon">绘制面</div>
+    <!-- <div class="btn4" @click="clearPolygon">清除面</div> -->
+    <div class="btn3" @click="clearPolygon">清除绘制</div>
   </div>
 </template>
 
@@ -33,6 +34,13 @@ export default {
       viewer = new Cesium.Viewer("cesiumContainer", {
         terrainProvider: Cesium.createWorldTerrain()
       })
+      // viewer.scene.globe.show = false;
+      const tileset = new Cesium.Cesium3DTileset({
+        url: Cesium.IonResource.fromAssetId(354759)
+      })
+      viewer.scene.primitives.add(tileset);
+
+      viewer.zoomTo(tileset);
     })
 
     const drawPolyline = ():void => {

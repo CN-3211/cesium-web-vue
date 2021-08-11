@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-03 20:57:00
+ * @LastEditTime: 2021-08-11 14:36:12
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
@@ -20,7 +20,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/clipModel',
     name: 'ClipModel',
-    component: () => import(/* webpackChunkName: "about" */ '../views/clipModel.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/clipModel.vue')
+  },
+  {
+    path: '/digTerrian',
+    name: 'DigTerrian',
+    component: () => import(/* webpackChunkName: "about" */ '@/views/digTerrian.vue')
   },
   {
     path: '/threeJsClipObjModelStencil',
