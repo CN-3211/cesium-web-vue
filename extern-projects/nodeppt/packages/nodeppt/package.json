@@ -1,0 +1,55 @@
+{
+    "name": "nodeppt",
+    "jsname": "nodeppt",
+    "description": "A simple, in-browser, markdown-driven presentation framework",
+    "version": "2.2.1",
+    "site": "https://github.com/ksky521/nodeppt",
+    "main": "index.js",
+    "author": {
+        "name": "Theo Wang",
+        "email": "ksky521@gmail.com"
+    },
+    "bin": {
+        "nodeppt": "bin/nodeppt"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ksky521/nodeppt"
+    },
+    "engines": {
+        "node": ">=8.9"
+    },
+    "dependencies": {
+        "commander": "^4.1.0",
+        "consolidate": "^0.15.1",
+        "fs-extra": "^8.1.0",
+        "handlebars": "^4.0.12",
+        "inquirer": "^7.0.3",
+        "nodeppt-js": "^2.2.1",
+        "nodeppt-parser": "^2.2.1",
+        "nodeppt-serve": "^2.2.1",
+        "nodeppt-shared-utils": "^2.2.1",
+        "nodeppt-template-default": "^1.0.2",
+        "semver": "^7.1.1",
+        "user-home": "^2.0.0",
+        "username": "^5.1.0"
+    },
+    "keywords": [
+        "presentation",
+        "powerpoint",
+        "slideshow",
+        "keynote",
+        "ppt",
+        "slide",
+        "revealjs",
+        "impressjs",
+        "markdown-it",
+        "posthtml",
+        "webpack",
+        "nodeppt",
+        "markdown"
+    ],
+    "readmeFilename": "README.md",
+    "license": "MIT",
+    "gitHead": "9fba34ba1a8cc3ab149c2447c313e25b1e25093e"
+}

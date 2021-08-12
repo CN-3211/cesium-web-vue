@@ -1,0 +1,40 @@
+{
+    "name": "nodeppt-js",
+    "version": "2.2.1",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": {
+        "name": "Theo Wang",
+        "email": "ksky521@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ksky521/nodeppt"
+    },
+    "license": "MIT",
+    "keywords": [
+        "presentation",
+        "powerpoint",
+        "slideshow",
+        "keynote",
+        "ppt",
+        "slide",
+        "revealjs",
+        "impressjs",
+        "markdown-it",
+        "posthtml",
+        "webpack",
+        "nodeppt",
+        "markdown"
+    ],
+    "dependencies": {
+        "animate.css": "^3.7.0",
+        "nodeppt-template-default": "^1.0.1",
+        "username": "^5.1.0",
+        "webslides": "1.5.0"
+    },
+    "gitHead": "9fba34ba1a8cc3ab149c2447c313e25b1e25093e"
+}
