@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-11 14:12:15
+ * @LastEditTime: 2021-08-13 10:47:40
  * @FilePath: \cesium-web-vue\src\views\stencilClip.ts
  */
 import * as THREE from 'three';
@@ -9,9 +9,6 @@ import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 
 import { watch, ref, Ref } from 'vue';
-const THREEFACECLIP = "三面切割";
-const ROUTERCLIP = "自定义切割";
-
 interface threeFaceClip {
   onlyShowPlanes: boolean
   negateX?: boolean
@@ -257,11 +254,11 @@ export default class stencilClip {
       _item.material.clippingPlanes = null;
     })
   }
-  changeShowType(showType) {
-    if(showType === "切面展示") {
+  onlyShowPlanes(isShowPlanes) {
+    if(isShowPlanes) {
       this._scene.remove(this.modelGroup);
-    } else if(showType === "三面裁剪") {
-      // this._scene.remove(this.modelGroup);
+    } else {
+      this._scene.add(this.modelGroup);
     }
   }
   lookAtPlane() {
@@ -282,11 +279,13 @@ export default class stencilClip {
       }
     }
 
+    // 只有在clipOptions中传入了routerClip/threeFaceClip参数后，才允许调整plane的lookAt
     if(this.clipOptions.routerClip) {
-      if(this.clipOptions.routerClip.isSelecting && !this.clipOptions.routerClip.isSelecting.value) {
+      // 若为routerClip，需要在选取路径结束后调用_lookAtPlane
+      if(!this.clipOptions.routerClip.isSelecting.value) {
         _lookAtPlane()
       }
-    } else {
+    } else if(this.clipOptions.threeFaceClip) {
       _lookAtPlane()
     }
   }

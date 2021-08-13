@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-11 14:11:33
+ * @LastEditTime: 2021-08-13 15:11:35
  * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
 -->
 <template>
@@ -9,11 +9,7 @@
     <div class="controlGroup">
       <el-tabs type="border-card" @tab-click="onTabClicked">
         <el-tab-pane v-for="tab in tabs" :key="tab" :label="tab">
-          <div v-show="tab === '切面展示'">
-            <div class="checkboxGroup">
-              <el-checkbox v-model="isClipMutual" label="不同切面直接是否相互剪切" @change="onClipMutual"></el-checkbox>
-            </div>
-          </div>
+          <el-switch v-show="tab === '三面裁剪'" v-model="isShowPlanes" active-text="显示切面" inactive-text="显示模型"></el-switch>
           <el-switch v-show="tab === '自定义切割'" v-model="isSelecting" active-text="开始选择" inactive-text="停止选择"></el-switch>
           <div>
             <span class="demonstration">X平面距离</span>
@@ -66,18 +62,17 @@ const modelNameArr = [
 
 let stencilClipIns: stencilClip; 
 const isSelecting = ref(false)
-const mouse = new THREE.Vector2();
-const selectPolyline: THREE.Vector3[] = [];
+const isShowPlanes = ref(false)
+const isClipMutual = ref(false);
 
 export default defineComponent({
   setup() {
-    const tabs = ref(["三面裁剪", "切面展示", "自定义切割"]);
+    const tabs = ref(["三面裁剪", "自定义切割"]);
     const negated = reactive({
       x: false,
       y: false,
       z: false
     })
-    const isClipMutual = ref(false);
     
     onMounted(async () => {
       await init();
@@ -98,21 +93,11 @@ export default defineComponent({
         item.constant = distance.z;
       })
     }
-    const onNegatedChange = (planIndex) => {
-      console.log('planIndex :>> ', planIndex);
-      stencilClipIns.planes[planIndex].forEach(item => item.negate());
-    }
+
     const onTabClicked = (vm) => {
       console.log('name :>> ', vm.props.label);
-      if(vm.props.label === '切面展示') {
-        stencilClipIns && stencilClipIns.changeShowType("切面展示");
-      }
     }
-    const onClipMutual = (mutualed) => {
-      stencilClipIns && stencilClipIns.changeClippingPlaneShowModel(mutualed);
-      console.log('mutualed :>> ', mutualed);
-    }
-    return { distance, onSlideX, onSlideY, onSlideZ, tabs, negated, onNegatedChange, onClipMutual, isClipMutual, onTabClicked, isSelecting }
+    return { distance, onSlideX, onSlideY, onSlideZ, tabs, negated,  isClipMutual, onTabClicked, isSelecting, isShowPlanes }
   },
 });
 
@@ -148,22 +133,21 @@ async function init(): Promise<void> {
   // 辅助调试
   const axisHelper = new THREE.AxesHelper(250);
   scene.add(axisHelper);
-  // debugger
   stencilClipIns = new stencilClip(scene, { 
-    // routerClip: {
-    //   isSelecting: isSelecting
-    // },
-    threeFaceClip: {
-      onlyShowPlanes: true,
-      negateX: true,
-      negateY: false,
-      negateZ: false
+    routerClip: {
+      isSelecting: isSelecting
     },
+    // threeFaceClip: {
+    //   onlyShowPlanes: isShowPlanes.value,
+    //   negateX: false,
+    //   negateY: false,
+    //   negateZ: false
+    // },
     clipEachOther: true
   });
   await stencilClipIns.loadModels("obj/分层地层切割模型/", modelNameArr);
-
-  /* 拾取点击坐标开始 */
+  console.log('sss :>> ', stencilClipIns.poGroup);
+  /* 监听拾取点击坐标开始 */
   watch(isSelecting, val => {
     if(val) {
       stencilClipIns.selectRouter(container, camera)
@@ -171,8 +155,12 @@ async function init(): Promise<void> {
       stencilClipIns.endSelectRouter()
     }
   })
-  /* 拾取点击坐标结束 */
+  /* 监听拾取点击坐标结束 */
 
+  watch(isShowPlanes, val => {
+    stencilClipIns.onlyShowPlanes(val);
+  })
+  
   // render配置
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
