@@ -19,6 +19,7 @@
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {
+    "@open-wc/webpack-import-meta-loader": "^0.4.7",
     "@types/cesium": "^1.67.13",
     "@types/three": "^0.129.1",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
@@ -31,7 +32,7 @@
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
-    "cesium": "^1.82.1",
+    "cesium": "^1.85.0",
     "cesiummeshvisualizer": "^1.0.2",
     "ejsexcel": "^3.6.1",
     "eslint": "^6.7.2",

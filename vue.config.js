@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-03 09:53:17
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-03 14:29:25
+ * @LastEditTime: 2021-09-27 16:52:27
  * @FilePath: \cesium-web-vue\vue.config.js
  */
 const webpack = require('webpack')
@@ -21,6 +21,14 @@ module.exports = {
       })
     ],
     module: {
+      rules: [
+        {
+          test: /\.js$/,
+          use: {
+            loader: '@open-wc/webpack-import-meta-loader',
+          },
+        },
+      ],
       // Removes these errors: "Critical dependency: require function is used in a way in which dependencies cannot be statically extracted"
       // https://github.com/AnalyticalGraphicsInc/cesium-webpack-example/issues/6
       unknownContextCritical: false,
