@@ -1,14 +1,14 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-13 10:47:40
+ * @LastEditTime: 2021-10-10 15:52:59
  * @FilePath: \cesium-web-vue\src\views\stencilClip.ts
  */
 import * as THREE from 'three';
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 
-import { watch, ref, Ref } from 'vue';
+import { Ref } from 'vue';
 interface threeFaceClip {
   onlyShowPlanes: boolean
   negateX?: boolean
@@ -108,7 +108,7 @@ export default class stencilClip {
         if(this.clipOptions.threeFaceClip) { 
           this.clipOptions.threeFaceClip?.onlyShowPlanes && this._scene.remove(this.modelGroup)
         }
-        const planeGeom = new THREE.PlaneGeometry(1, 1);
+        const planeGeom = new THREE.PlaneGeometry(100000, 100000);
 
         const plane = this.planes[x][i];
         layerModel.children.forEach((itemModel) => {
@@ -177,9 +177,6 @@ export default class stencilClip {
     mat0.side = THREE.BackSide;
     mat0.clippingPlanes = [plane];
     // IncrementWrapStencilOp将当前stencil value增加1
-    mat0.stencilFunc = THREE.AlwaysStencilFunc;
-    mat0.stencilFail = THREE.IncrementWrapStencilOp;
-    mat0.stencilZFail = THREE.IncrementWrapStencilOp;
     mat0.stencilZPass = THREE.IncrementWrapStencilOp;
 
     const mesh0: THREE.Mesh = new THREE.Mesh(layerModel, mat0);

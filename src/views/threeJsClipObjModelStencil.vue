@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-13 15:11:35
+ * @LastEditTime: 2021-10-10 16:06:26
  * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
 -->
 <template>
@@ -40,24 +40,31 @@ const distance = reactive({
 let renderer: THREE.WebGLRenderer;
 let scene: THREE.Scene;
 let camera: THREE.PerspectiveCamera;
-const modelNameArr = [
-  "1-2",
-  "3-1",
-  "3-2",
-  "3-4",
-  "4-1",
-  "4-4",
-  "8-1",
-  "8-4",
-  "11-1",
-  "11-4",
-  "17-1",
-  "17-2",
-  "17-3",
-  "17-4",
-  "17-5",
-  "g孤石",
-];
+const modelNameArr = [ '①',
+  '②-1',
+  '②-10',
+  '②-2',
+  '②-3',
+  '②-4',
+  '②-5',
+  '②-6',
+  '②-7',
+  '②-8',
+  '②-9',
+  '③',
+  '④-1',
+  '④-2',
+  '④-3',
+  '⑤',
+  '⑥-1',
+  '⑥-2',
+  '⑦-1',
+  '⑦-2',
+  '⑦-3',
+  '⑧',
+  '⑨',
+  '⑩',
+  '⑾' ];
 
 
 let stencilClipIns: stencilClip; 
@@ -112,7 +119,7 @@ async function init(): Promise<void> {
     36,
     container.clientWidth / container.clientHeight,
     1,
-    1000
+    10000
   );
   camera.position.set(0, 0, 3);
 
@@ -134,19 +141,31 @@ async function init(): Promise<void> {
   const axisHelper = new THREE.AxesHelper(250);
   scene.add(axisHelper);
   stencilClipIns = new stencilClip(scene, { 
-    routerClip: {
-      isSelecting: isSelecting
-    },
-    // threeFaceClip: {
-    //   onlyShowPlanes: isShowPlanes.value,
-    //   negateX: false,
-    //   negateY: false,
-    //   negateZ: false
+    // routerClip: {
+    //   isSelecting: isSelecting
     // },
+    threeFaceClip: {
+      onlyShowPlanes: isShowPlanes.value,
+      negateX: false,
+      negateY: false,
+      negateZ: false
+    },
     clipEachOther: true
   });
-  await stencilClipIns.loadModels("obj/分层地层切割模型/", modelNameArr);
-  console.log('sss :>> ', stencilClipIns.poGroup);
+  await stencilClipIns.loadModels("obj/惠南湖分层模型/", modelNameArr);
+  const box = new THREE.Box3();
+  const groupCenter = new THREE.Vector3()
+  box.expandByObject(stencilClipIns.modelGroup);
+  box.getCenter(groupCenter)
+  stencilClipIns.modelGroup.translateX(-groupCenter.x);
+  stencilClipIns.modelGroup.translateY(-groupCenter.y);
+  stencilClipIns.modelGroup.translateZ(-groupCenter.z);
+  stencilClipIns.modelGroup.scale.set(1, 1, 10);
+  stencilClipIns.stencilGroup.translateX(-groupCenter.x);
+  stencilClipIns.stencilGroup.translateY(-groupCenter.y);
+  stencilClipIns.stencilGroup.translateZ(-groupCenter.z);
+  stencilClipIns.stencilGroup.scale.set(1, 1, 10);
+
   /* 监听拾取点击坐标开始 */
   watch(isSelecting, val => {
     if(val) {
