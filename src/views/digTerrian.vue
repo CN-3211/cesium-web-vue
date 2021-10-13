@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-07-14 14:39:23
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-05 11:59:43
+ * @LastEditTime: 2021-10-11 10:30:27
  * @FilePath: \cesium-web-vue\src\views\digTerrian.vue
 -->
 <template>
@@ -20,13 +20,6 @@ import * as Cesium from 'cesium';
 import transform from "@/utils/vue-utils/transform/transform";
 import { DrawPolygon } from '@/utils/vue-utils/draw/drawUtils';
 import TerrainClipPlan from '@/utils/js-utils/terrainClip/TerrainClipPlan';
-
-const positions = [
-  Cesium.Cartesian3.fromDegrees(120, 30.000),
-  Cesium.Cartesian3.fromDegrees(120, 30.001),
-  Cesium.Cartesian3.fromDegrees(120.001, 30.001),
-  Cesium.Cartesian3.fromDegrees(120.001, 30.000)
-]
 
 let viewer: Cesium.Viewer;
 let tileset: Cesium.Cesium3DTileset;
@@ -67,7 +60,7 @@ function initMap(): Cesium.Viewer {
     terrainProvider: Cesium.createWorldTerrain(),
   });
   viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
-  viewer.scene.globe.show = false;
+  viewer.scene.globe.show = true;
 
   return viewer
 }

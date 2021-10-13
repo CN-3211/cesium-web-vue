@@ -1,13 +1,15 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-11 14:36:12
+ * @LastEditTime: 2021-10-10 19:19:14
  * @FilePath: \cesium-web-vue\src\router\index.ts
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Draw from '@/views/draw.vue';
+import Index from '@/views/index.vue';
 
 const routes: Array<RouteRecordRaw> = [
+  { path: '/', name: 'Index', component: Index },
   { path: '/draw', name: 'Draw', component: Draw },
   {
     path: '/transform3Dtiles',
@@ -70,6 +72,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/sand/CustomDataSource",
     name: "sandCustomDataSource",
     component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/CustomDataSource.vue')
+  },
+  {
+    path: "/sand/Weather",
+    name: "weather",
+    component: () => import(/* webpackChunkName: "about" */ '@/views/sandcastleExample/Weather.vue')
   },
   {
     path: "/load3DTiles",

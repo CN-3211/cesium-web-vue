@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-13 20:54:58
+ * @LastEditTime: 2021-10-11 09:20:52
  * @FilePath: \cesium-web-vue\src\views\transform3Dtiles.vue
 -->
 <template>
@@ -63,6 +63,7 @@
         <el-input-number
           v-model="state.height"
           @input="onChanged"
+          :step="100"
         ></el-input-number>
       </div>
       <div class="adjustPosition">
@@ -103,11 +104,11 @@ export default defineComponent({
   // setup返回值应该怎么定义类型
   setup() {
     const state = reactive({
-      rotateX: 17.9,
-      rotateY: -7.3,
-      rotateZ: 0,
-      lng: 109.3062,
-      lat: 21.66081,
+      rotateX: -9,
+      rotateY: -6,
+      rotateZ: 79,
+      lng: 109.45966, 
+      lat: 31.02833,
       height: 500
     });
 
@@ -120,7 +121,7 @@ export default defineComponent({
       tileset = viewer.scene.primitives.add(
         new Cesium3DTileset({
           // url: "3DTiles/stratum/tileset.json",
-          url: "3DTiles/tileset/tileset.json",
+          url: "3DTiles/hzhnhgeo/tileset.json"
         })
       );
       

@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-10 09:13:02
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-29 09:08:12
+ * @LastEditTime: 2021-10-10 19:38:44
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\transform\transform.ts
  */
 import * as Cesium from 'cesium'
@@ -15,7 +15,6 @@ export default class transform {
   constructor(boundingSphereCenter: Cesium.Cartesian3, modelMatrix: Cesium.Matrix4) {
     transform.boundingSphereCenter = boundingSphereCenter;
     transform.modelMatrix = modelMatrix;
-
   }
   /**
    * @description: 平移
