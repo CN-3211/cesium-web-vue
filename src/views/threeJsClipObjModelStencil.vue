@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-10 16:06:26
+ * @LastEditTime: 2021-10-13 22:14:51
  * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
 -->
 <template>
@@ -17,7 +17,7 @@
             <span class="demonstration">Y平面距离</span>
             <el-slider v-model="distance.y" :min="-1" :max="1" :step="0.001" @input="onSlideY"></el-slider>
             <span class="demonstration">Z平面距离</span>
-            <el-slider v-model="distance.z" :min="-1" :max="1" :step="0.001" @input="onSlideZ"></el-slider>
+            <el-slider v-model="distance.z" :min="-3" :max="3" :step="0.001" @input="onSlideZ"></el-slider>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -40,31 +40,13 @@ const distance = reactive({
 let renderer: THREE.WebGLRenderer;
 let scene: THREE.Scene;
 let camera: THREE.PerspectiveCamera;
-const modelNameArr = [ '①',
-  '②-1',
-  '②-10',
-  '②-2',
-  '②-3',
-  '②-4',
-  '②-5',
-  '②-6',
-  '②-7',
-  '②-8',
-  '②-9',
-  '③',
-  '④-1',
-  '④-2',
-  '④-3',
-  '⑤',
-  '⑥-1',
-  '⑥-2',
-  '⑦-1',
-  '⑦-2',
-  '⑦-3',
-  '⑧',
-  '⑨',
-  '⑩',
-  '⑾' ];
+const modelNameArr = [ 
+ '1-1', // 黄色片片
+ '2-1', // 粉色片片
+ '3-1', // 金色片片
+ '4-1', // 绿色部分Z轴拉伸成块块，部分片片
+ '4-2', // 粉色块块
+];
 
 
 let stencilClipIns: stencilClip; 
@@ -148,11 +130,11 @@ async function init(): Promise<void> {
       onlyShowPlanes: isShowPlanes.value,
       negateX: false,
       negateY: false,
-      negateZ: false
+      negateZ: true
     },
     clipEachOther: true
   });
-  await stencilClipIns.loadModels("obj/惠南湖分层模型/", modelNameArr);
+  await stencilClipIns.loadModels("obj/建模深度60米三维地质模型/", modelNameArr);
   const box = new THREE.Box3();
   const groupCenter = new THREE.Vector3()
   box.expandByObject(stencilClipIns.modelGroup);
@@ -160,11 +142,11 @@ async function init(): Promise<void> {
   stencilClipIns.modelGroup.translateX(-groupCenter.x);
   stencilClipIns.modelGroup.translateY(-groupCenter.y);
   stencilClipIns.modelGroup.translateZ(-groupCenter.z);
-  stencilClipIns.modelGroup.scale.set(1, 1, 10);
+  // stencilClipIns.modelGroup.scale.set(1, 1, 10);
   stencilClipIns.stencilGroup.translateX(-groupCenter.x);
   stencilClipIns.stencilGroup.translateY(-groupCenter.y);
   stencilClipIns.stencilGroup.translateZ(-groupCenter.z);
-  stencilClipIns.stencilGroup.scale.set(1, 1, 10);
+  // stencilClipIns.stencilGroup.scale.set(1, 1, 10);
 
   /* 监听拾取点击坐标开始 */
   watch(isSelecting, val => {

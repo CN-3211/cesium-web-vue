@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-10 15:52:59
+ * @LastEditTime: 2021-10-14 10:32:09
  * @FilePath: \cesium-web-vue\src\views\stencilClip.ts
  */
 import * as THREE from 'three';
@@ -98,6 +98,7 @@ export default class stencilClip {
     for (let x = 0; x < this.planes.length; x++) {
       for (let i = 0; i < this.objAndMtls.length; i++) {
         const layerModel = this.objAndMtls[i].obj;
+
         layerModel.traverse((child: THREE.Object3D) => {
           if (child instanceof THREE.Mesh) {
             child.material.clippingPlanes = clippingPlanes;
@@ -113,7 +114,10 @@ export default class stencilClip {
         const plane = this.planes[x][i];
         layerModel.children.forEach((itemModel) => {
           const _itemModel = itemModel as THREE.Mesh;
+          const _itemModelMaterial = _itemModel.material as THREE.MeshBasicMaterial;
           const geometry = _itemModel.geometry.clone();
+          // 线框模式
+          _itemModelMaterial.wireframe = false
 
           const stencilGroup = this.createPlaneStencilGroup(
             geometry,
@@ -137,16 +141,13 @@ export default class stencilClip {
           stencilWrite: true,
           stencilRef: 0,
           stencilFunc: THREE.NotEqualStencilFunc,
-          stencilFail: THREE.ReplaceStencilOp,
-          stencilZFail: THREE.ReplaceStencilOp,
-          stencilZPass: THREE.ReplaceStencilOp,
         });
         this.clipOptions.clipEachOther && (planeMat.clippingPlanes = result)
         const po = new THREE.Mesh(planeGeom, planeMat);
         po.onAfterRender = (renderer) => {
           renderer.clearStencil();
         };
-        po.renderOrder = i + 1.2;
+        po.renderOrder = i + 2.2;
         this.poGroup.add(po);
         this.planeObjects[x].push(po);
       }
@@ -188,8 +189,6 @@ export default class stencilClip {
     mat1.side = THREE.FrontSide;
     mat1.clippingPlanes = [plane];
     // DecrementWrapStencilOp将当前stencil value减少1
-    mat1.stencilFail = THREE.DecrementWrapStencilOp;
-    mat1.stencilZFail = THREE.DecrementWrapStencilOp;
     mat1.stencilZPass = THREE.DecrementWrapStencilOp;
 
     const mesh1 = new THREE.Mesh(layerModel, mat1);
