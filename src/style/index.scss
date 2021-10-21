@@ -1,0 +1,69 @@
+@import "./reset.scss";
+
+body {
+  font-size: 14px;
+  color: #141414;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+}
+
+html, body{
+  height: 100%;
+}
+
+div:focus{
+  outline: none;
+}
+
+.fr {
+  float: right;
+}
+
+.fl {
+  float: left;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+em {
+  color: #3886FF;
+  text-decoration: underline;
+  font-style: normal;
+  cursor: pointer;
+}
+
+
+button, input, select, textarea {
+  line-height: initial;
+}
