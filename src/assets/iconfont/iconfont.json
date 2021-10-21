@@ -1,0 +1,30 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1968821",
+      "name": "测量",
+      "font_class": "celiang",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "5650853",
+      "name": "标绘",
+      "font_class": "biaohui",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "13106274",
+      "name": "其他",
+      "font_class": "qita",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    }
+  ]
+}
