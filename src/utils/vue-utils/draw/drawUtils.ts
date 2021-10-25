@@ -4,52 +4,110 @@
  * @LastEditTime: 2021-08-04 17:52:08
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\drawUtils.ts
  */
-import { Viewer, ScreenSpaceEventHandler, Cartesian3, Cartesian2, ScreenSpaceEventType, Ray, defined, CallbackProperty, Color, Entity, PolygonHierarchy
- } from 'cesium'
-import Cesium3DTile from 'cesium/Source/Scene/Cesium3DTile';
+import {
+  CallbackProperty,
+  Cartesian2,
+  Cartesian3,
+  ClassificationType,
+  Color,
+  defined,
+  Entity, HeightReference, HorizontalOrigin,
+  PolygonHierarchy,
+  Ray,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType, VerticalOrigin,
+  Viewer
+} from 'cesium'
+
+class DrawBillboard{
+  static _viewer;
+  handler: ScreenSpaceEventHandler;
+  billboardGroup: Entity[];
+  positions: Cartesian3[];
+  constructor(viewer: Viewer) {
+    DrawBillboard._viewer = viewer;
+    this.handler = new ScreenSpaceEventHandler(DrawBillboard._viewer.scene.canvas);
+    this.positions = [];
+    this.billboardGroup = [];
+  }
+  startCreate() {
+    this.handler.setInputAction(Event => {
+      const cartesian:Cartesian3 = this.getCatesian3FromPX(Event.position);
+      if (!cartesian) return;
+      const billboard = this.createBillboard(cartesian);
+      this.billboardGroup.push(billboard);
+      this.positions.push(cartesian);
+    }, ScreenSpaceEventType.LEFT_CLICK)
+  }
+  createBillboard(cartesian:Cartesian3): Entity {
+    return DrawBillboard._viewer.entities.add({
+      position: cartesian,
+      billboard: {
+        image: 'image/map-marker.png',
+        scale: 0.2,
+        horizontalOrigin: HorizontalOrigin.CENTER,	//获取或设置此广告牌的水平原点，确定该广告牌是否为在其锚定位置的左侧，中心或右侧。
+        verticalOrigin: VerticalOrigin.BOTTOM,		//获取或设置此广告牌的垂直原点，以确定该广告牌是否为到其锚定位置的上方，下方或中心。
+        heightReference:HeightReference.CLAMP_TO_GROUND,	//获取或设置此广告牌的高度参考
+        disableDepthTestDistance:Number.MAX_VALUE				//获取或设置与相机的距离，在深度处禁用深度测试，例如，以防止剪切地形。设置为零时，将始终应用深度测试。设置为Number.POSITIVE_INFINITY时，永远不会应用深度测试。
+      }
+    });
+  }
+  getCatesian3FromPX(px:Cartesian2):Cartesian3 {
+    const ray:Ray = DrawBillboard._viewer.camera.getPickRay(px);
+    const cartesian:Cartesian3|undefined = DrawBillboard._viewer.scene.globe.pick(ray, DrawBillboard._viewer.scene);
+    if(!cartesian) {
+      throw new Error("未获取到正确坐标");
+    }
+    return cartesian
+  }
+  stopDrawing() {
+    this.handler.destroy();
+  }
+
+}
 
 class DrawPolyline {
   static _viewer: Viewer;
-  static _handler: ScreenSpaceEventHandler;
-  static _polyline: Entity|undefined;
-  _positions: Cartesian3[];
+  handler: ScreenSpaceEventHandler;
+  polyline: Entity|undefined;
+  positions: Cartesian3[];
 
   constructor(viewer: Viewer) {
     DrawPolyline._viewer = viewer;
-    DrawPolyline._handler = new ScreenSpaceEventHandler(DrawPolyline._viewer.scene.canvas);
-    DrawPolyline._polyline = undefined;
-    this._positions = [];
+    this.handler = new ScreenSpaceEventHandler(DrawPolyline._viewer.scene.canvas);
+    this.polyline = undefined;
+    this.positions = [];
   }
 
   startCreate(callback?: (params: Cartesian3[]) => void): void {
-    DrawPolyline._handler.setInputAction(Event => {
+    this.handler.setInputAction(Event => {
       const cartesian:Cartesian3 = this.getCatesian3FromPX(Event.position);
-      if(this._positions.length === 0) {
-        this._positions.push(cartesian.clone())
+      if(this.positions.length === 0) {
+        this.positions.push(cartesian.clone())
       }
 
-      this._positions.push(cartesian);
+      this.positions.push(cartesian);
     }, ScreenSpaceEventType.LEFT_CLICK)
-
-    DrawPolyline._handler.setInputAction(Event => {
-      if(!this._positions.length) {
+  
+    this.handler.setInputAction(Event => {
+      if(!this.positions.length) {
         return;
       }
       const cartesian = this.getCatesian3FromPX(Event.endPosition)
-      if(this._positions.length === 2 && !defined(DrawPolyline._polyline)) {
-        DrawPolyline._polyline = this.createPolyline();
+      if(this.positions.length === 2 && !defined(this.polyline)) {
+        this.polyline = this.createPolyline();
       }
-      if (DrawPolyline._polyline) {
-				this._positions.pop();
-				this._positions.push(cartesian);
+      if (this.polyline) {
+				this.positions.pop();
+				this.positions.push(cartesian);
 			}
     }, ScreenSpaceEventType.MOUSE_MOVE)
-    DrawPolyline._handler.setInputAction(Event => {
+    this.handler.setInputAction(Event => {
       const cartesian = this.getCatesian3FromPX(Event.position);
-      DrawPolyline._handler.destroy();
-      this._positions.pop();
-      this._positions.push(cartesian);
-      callback && callback(this._positions);
+      this.handler.destroy();
+      this.positions.pop();
+      this.positions.push(cartesian);
+      callback && callback(this.positions);
     }, ScreenSpaceEventType.RIGHT_CLICK);
     return;
   }
@@ -69,18 +127,23 @@ class DrawPolyline {
   createPolyline():Entity {
     return DrawPolyline._viewer.entities.add({
       polyline: {
-        positions: new CallbackProperty(() => this._positions, false),
+        positions: new CallbackProperty(() => this.positions, false),
         material: Color.YELLOW,
         width: 3,
         show: true,
-        clampToGround: true
+        clampToGround: true,
+        classificationType: ClassificationType.TERRAIN
       }
     })
   }
+  stopDrawing() {
+    this.handler.destroy();
+    this.polyline && DrawPolyline._viewer.entities.remove(this.polyline);
+  }
   destroy():void {
-    DrawPolyline._polyline = undefined;
-    if(!DrawPolyline._handler.isDestroyed()) {
-      DrawPolyline._handler.destroy()
+    this.polyline = undefined;
+    if(!this.handler.isDestroyed()) {
+      this.handler.destroy()
     }
     DrawPolyline._viewer.entities.removeAll();
     return
@@ -88,11 +151,11 @@ class DrawPolyline {
 }
 
 class DrawPolygon {
-  handler: ScreenSpaceEventHandler
-  positions: Cartesian3[]
-  polyline: Entity|undefined
-  polygon: Entity|undefined
-  static _viewer: Viewer
+  handler: ScreenSpaceEventHandler;
+  positions: Cartesian3[];
+  polyline: Entity|undefined;
+  polygon: Entity|undefined;
+  static _viewer: Viewer;
   constructor(viewer: Viewer) {
     DrawPolygon._viewer = viewer;
     this.handler = new ScreenSpaceEventHandler(DrawPolygon._viewer.scene.canvas);
@@ -139,12 +202,9 @@ class DrawPolygon {
 
       this.positions.pop();
       this.positions.push(rClickPosition);
+  
       this.handler.destroy();
-      if(callback) {
-        callback(this.positions);
-      }
-      this.polygon = undefined;
-      this.polyline = undefined;
+      callback && callback(this.positions);
     }, ScreenSpaceEventType.RIGHT_CLICK)
   }
   getCatesian3FromPX(px:Cartesian2):Cartesian3 {
@@ -158,11 +218,12 @@ class DrawPolygon {
   createPolyLine() {
     this.polyline = DrawPolygon._viewer.entities.add({
       polyline: {
-        positions: new CallbackProperty(() => this.positions, false),
-        material: Color.YELLOW,
+        positions: new CallbackProperty(() => this.positions.concat(this.positions[0]), false),
+        material: new Color(0.1, 0.5, 0.9, 0.8),
         width: 3,
-        show: false,
-        clampToGround: true
+        show: true,
+        clampToGround: true,
+        classificationType: ClassificationType.TERRAIN
       }
     })
   }
@@ -171,12 +232,14 @@ class DrawPolygon {
       polygon: {
         hierarchy: new CallbackProperty(() => new PolygonHierarchy(this.positions), false),
 				material: new Color(0.1, 0.5, 0.9, 0.4),
-				outline: true,
-        // 想设置outline，必须要有高度
-        outlineColor: Color.RED,
-        outlineWidth: 1
+        classificationType: ClassificationType.TERRAIN
       }
     })
+  }
+  stopDrawing() {
+    this.handler.destroy();
+    this.polygon && DrawPolygon._viewer.entities.remove(this.polygon);
+    this.polyline && DrawPolygon._viewer.entities.remove(this.polyline);
   }
   destroy(): void {
     this.polygon = undefined;
@@ -200,4 +263,4 @@ class DrawOn3Dtiles {
   }
 }
 
-export { DrawPolyline, DrawPolygon }
+export { DrawPolyline, DrawPolygon, DrawBillboard }
