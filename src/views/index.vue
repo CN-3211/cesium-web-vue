@@ -1,47 +1,52 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-13 15:43:02
- * @FilePath: \cesium-web-vue\src\views\index.vue
+ * @LastEditTime: 2021-10-20 20:20:45
+ * @FilePath: \cesium-web-vue\src\views\plotting.vue
 -->
 <template>
   <div class="index">
     <div id="cesiumContainer"></div>
-    <div class="btn" @click="drawPolyline">绘制线</div>
+    <ToolbarGroup class="toolbar-group" :viewer="viewer"></ToolbarGroup>
+    <!-- <div class="btn" @click="drawPolyline">绘制线</div>
     <div class="btn2" @click="drawPolygon">绘制面</div>
-    <div class="btn3" @click="clearPolygon">清除绘制</div>
+    <div class="btn3" @click="clearPolygon">清除绘制</div> -->
 
-    <div class="controlsGroup">
+    <!-- <div class="controlsGroup">
       <el-button @click="startDig">点击绘制挖掘面</el-button>
-      <el-switch v-model="isKeyboardModel" @change="onChangeCameraModel" />
-    </div>
+      <span style="color:red;font-weight: bold;">视角漫游</span><el-switch v-model="isKeyboardModel" @change="onChangeCameraModel" />
+    </div> -->
   </div>
 </template>
 
 <script lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, provide, reactive, Ref, nextTick, unref, toRefs  } from 'vue';
 
 import { DrawPolyline, DrawPolygon } from "@/utils/vue-utils/draw/drawUtils";
 import transform from "@/utils/vue-utils/transform/transform";
 import limitClip from '@/utils/vue-utils/limitGlobe/index';
 import TerrainClipPlan from '@/utils/js-utils/terrainClip/TerrainClipPlan';
 import interaction from '@/utils/vue-utils/keyboardInteraction/index';
+
+import ToolbarGroup from '@/components/toolbarGroup/toolbarGroup.vue';
 import * as Cesium from 'cesium';
+const isKeyboardModel = ref(false)
+
+let viewer:Cesium.Viewer;
+let DrawPolylineIns:DrawPolyline|undefined;
+let DrawPolygonIns:DrawPolygon|undefined;
 export default {
   // setup返回值应该怎么定义类型
   setup() {
-    const isKeyboardModel = ref(false)
-
-
-    let viewer:Cesium.Viewer;
-    let DrawPolylineIns:DrawPolyline|undefined;
-    let DrawPolygonIns:DrawPolygon|undefined;
-
+    const _viewer: { viewer: Cesium.Viewer|null } = { viewer: null };
     onMounted(() => {
       viewer = new Cesium.Viewer("cesiumContainer", {
         terrainProvider: Cesium.createWorldTerrain(),
         skyAtmosphere: false
-      })
+      });
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+      _viewer.viewer = viewer;
+
       new limitClip(viewer);
 
       // viewer.scene.globe.show = false;
@@ -61,7 +66,7 @@ export default {
         let trans = new transform(boundingSphereCenter, modelMatrix);
         const tmpMatrix = new Cesium.Matrix4();
         Cesium.Matrix4.multiply(
-          trans.translation(109.45966, 31.02833, 0),
+          trans.translation(109.45966, 31.02833, -200),
           trans.rotation(-9, -6, 79),
           tmpMatrix
         );
@@ -70,8 +75,28 @@ export default {
 
         viewer.zoomTo(tileset);
       })
-    })
 
+      const tileset2 = new Cesium.Cesium3DTileset({
+        url: Cesium.IonResource.fromAssetId(354759)
+      })
+      viewer.scene.primitives.add(tileset2);
+
+      tileset2.readyPromise.then(tileset => {
+        let boundingSphereCenter = tileset.boundingSphere.center.clone()
+        let modelMatrix = tileset.modelMatrix.clone()
+        let trans = new transform(boundingSphereCenter, modelMatrix);
+        const tmpMatrix = new Cesium.Matrix4();
+        Cesium.Matrix4.multiply(
+          trans.translation(109.46266, 31.02533, -40),
+          trans.rotation(-107, 0, 128),
+          tmpMatrix
+        );
+        
+        tileset.modelMatrix = tmpMatrix;
+
+      })
+    });
+    provide('_viewer', _viewer);
     let lastTerrainClip:TerrainClipPlan;
     const startDig = () => {
       // 每次挖地之前清除上一次的贴图和plane
@@ -127,6 +152,8 @@ export default {
 
     }
 
+    
+
     return {
       drawPolyline,
       clearPolyline,
@@ -134,8 +161,12 @@ export default {
       clearPolygon,
       startDig,
       isKeyboardModel,
-      onChangeCameraModel
+      onChangeCameraModel,
+      viewer
     }
+  },
+  components: {
+    ToolbarGroup
   }
 };
 
@@ -146,7 +177,11 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
-  
+  .toolbar-group {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
   #cesiumContainer {
     width: 100%;
     height: 100%;
@@ -183,7 +218,7 @@ export default {
     border-radius: 3%;
     position: absolute;
     top: 30px;
-    left: 10px;
+    left: 120px;
     background-color: rgba($color: #FFFFFF, $alpha: 0.2);
     .control-switch {
       color: #fff;

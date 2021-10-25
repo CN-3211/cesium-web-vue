@@ -1,6 +1,6 @@
 @font-face {
   font-family: "iconfont"; /* Project id  */
-  src: url('iconfont.ttf?t=1634736318957') format('truetype');
+  src: url('iconfont.ttf?t=1634796350788') format('truetype');
 }
 
 .iconfont {
@@ -15,8 +15,20 @@
   content: "\e603";
 }
 
+.icon-tool_polygon:before {
+  content: "\e658";
+}
+
 .icon-biaohui:before {
   content: "\e60a";
+}
+
+.icon-Pointer:before {
+  content: "\e8a0";
+}
+
+.icon-polyline:before {
+  content: "\e80c";
 }
 
 .icon-qita:before {

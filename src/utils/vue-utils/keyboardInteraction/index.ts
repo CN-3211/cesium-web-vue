@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-10-11 15:45:43
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-13 15:40:54
+ * @LastEditTime: 2021-10-17 16:30:52
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\keyboardInteraction\index.ts
  */
 import * as Cesium from 'cesium';
@@ -70,7 +70,7 @@ export default class interaction {
   }
 
   static evOnTick() {
-    interaction.moveRate.keyboard = Cesium.Cartographic.fromCartesian(interaction.viewer.camera.position, interaction.viewer.scene.globe.ellipsoid).height / 100;
+    interaction.moveRate.keyboard = Cesium.Cartographic.fromCartesian(interaction.viewer.camera.position, interaction.viewer.scene.globe.ellipsoid).height / 100 + 5;
   
     Object.keys(interaction.keyboardState).forEach(key => {
       if(!interaction.keyboardState[key]) {

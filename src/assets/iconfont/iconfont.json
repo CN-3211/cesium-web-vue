@@ -13,11 +13,32 @@
       "unicode_decimal": 58883
     },
     {
+      "icon_id": "5313517",
+      "name": "tool_polygon",
+      "font_class": "tool_polygon",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
       "icon_id": "5650853",
       "name": "标绘",
       "font_class": "biaohui",
       "unicode": "e60a",
       "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "5806778",
+      "name": "3 Pointer",
+      "font_class": "Pointer",
+      "unicode": "e8a0",
+      "unicode_decimal": 59552
+    },
+    {
+      "icon_id": "11229898",
+      "name": "polyline",
+      "font_class": "polyline",
+      "unicode": "e80c",
+      "unicode_decimal": 59404
     },
     {
       "icon_id": "13106274",
