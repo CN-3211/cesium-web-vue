@@ -1,23 +1,26 @@
 <template>
   <div class="plotting">
-    <el-row :gutter="20">
+    <el-row>
       <el-col :span="8" v-for="item in plottingTools" :key="item">
-        <div class="plotting-item" @click="onToolActive(item)">
-          <div class="iconfont" :class="activedTool === item.name ? `iconfontActive ${item.icon}` : item.icon">
-          </div>
-          <div class="plotting-item-name" :class="activedTool === item.name && 'plottingItemNameActive'">{{item.name}}</div>
-        </div>
+        <Tool :name="item.name" :icon="item.icon" :isActive="item.name === activedTool" @click="onToolActive(item)"></Tool>
+      </el-col>
+    </el-row>
+    <p>模型标绘</p>
+    <el-row>
+      <el-col :span="8" v-for="item in modelPlottingTools" :key="item">
+        <Tool :name="item.name" :icon="item.icon" :isActive="item.name === activedTool" @click="onToolActive(item)"></Tool>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script lang="ts">
-  import {ref, defineComponent, inject, onMounted, Ref, unref, watch, reactive} from "vue";
-  import Cesium, { Viewer } from 'cesium';
+  import {ref, defineComponent, inject, reactive} from "vue";
+  import Cesium from 'cesium';
   import { ElMessage } from 'element-plus'
+  import Tool from '../tool.vue'
   
-  import { DrawPolyline, DrawPolygon, DrawBillboard } from "@/utils/vue-utils/draw/drawUtils";
+  import { DrawPolyline, DrawPolygon, DrawBillboard, CESIUM_3D_TILE, TERRAIN } from "@/utils/vue-utils/draw/drawUtils";
   
   // 配置文件模块
   const PLOT_POINTER = "标记点";
@@ -29,6 +32,10 @@
     { name: PLOT_POLYLINE, icon:"icon-polyline" },
     { name: PLOT_POLYGON, icon:"icon-tool_polygon" }
   ]);
+  
+  const modelPlottingTools = ref({
+  
+  });
   
   // 图标高亮模块
   let activedTool = ref('');
@@ -74,20 +81,17 @@
     }
   }
   
-  let viewer: Viewer;
-  let _viewer:{ viewer: Cesium.Viewer } | undefined;
+  let _viewer:{ viewer: Cesium.Viewer };
   
   let DrawPolylineIns:DrawPolyline|undefined;
   const drawPolyline = ():void => {
-    if(!viewer || !viewer) {
+    if(!_viewer.viewer) {
       ElMessage('viewer尚未初始化');
       return;
     }
-    DrawPolylineIns = new DrawPolyline(viewer);
+    DrawPolylineIns = new DrawPolyline(_viewer.viewer, { drawType: CESIUM_3D_TILE });
     /** 要支持连续绘制 */
-    DrawPolylineIns.startCreate(() => {
-      activedTool.value = '';
-    });
+    DrawPolylineIns.startCreate();
     /** 要支持连续绘制 */
   };
   const stopPolyline = () => {
@@ -97,14 +101,12 @@
   
   let DrawPolygonIns: DrawPolygon|undefined;
   const drawPolygon = () => {
-    if(!viewer || !viewer) {
+    if(!_viewer.viewer) {
       ElMessage('viewer尚未初始化');
       return;
     }
-    DrawPolygonIns = new DrawPolygon(viewer);
-    DrawPolygonIns.startCreate(() => {
-      activedTool.value = '';
-    });
+    DrawPolygonIns = new DrawPolygon(_viewer.viewer, { drawType: CESIUM_3D_TILE });
+    DrawPolygonIns.startCreate();
   };
   const stopPolygon = () => {
     DrawPolygonIns && DrawPolygonIns.stopDrawing();
@@ -113,38 +115,38 @@
 
   let DrawBillboardIns: DrawBillboard|undefined;
   const drawBillboard = () => {
-    if(!viewer || !viewer) {
+    if(!_viewer.viewer) {
       ElMessage('viewer尚未初始化');
       return;
     }
-    DrawBillboardIns = new DrawBillboard(viewer);
+    DrawBillboardIns = new DrawBillboard(_viewer.viewer);
     DrawBillboardIns.startCreate();
   };
   const stopBillboard = () => {
     DrawBillboardIns && DrawBillboardIns.stopDrawing();
     DrawBillboardIns = undefined;
   };
- 
+
+  
   
   export default defineComponent({
     setup() {
-      _viewer = inject('_viewer');
+      const injectViewer: {viewer: Cesium.Viewer} | undefined = inject('_viewer');
+      if(!injectViewer) {
+        throw Error("provide/inject失败");
+      }
       
-      /**  这里要改  */
-      setTimeout(() => {
-        if(!_viewer) {
-          throw Error("provide/inject失败");
-        }
-        viewer = _viewer.viewer;
-      }, 2000);
-      /**  这里要改  */
-  
+      _viewer = injectViewer;
   
       return {
         plottingTools,
         onToolActive,
-        activedTool
+        activedTool,
+        modelPlottingTools
       }
+    },
+    components: {
+      Tool
     }
   })
   
@@ -154,34 +156,5 @@
   .plotting {
     width: 100%;
     height: 100%;
-    .plotting-item {
-      width: 100%;
-      height: 85px;
-      padding-top: 5px;
-      .iconfont {
-        width: 40px;
-        height: 40px;
-        background-color: #fff;
-        font-size: 20px;
-        line-height: 40px;
-        border-radius: 10px;
-        margin: 0 auto;
-        cursor: pointer;
-      }
-      .iconfontActive {
-        background-color: #3B7CFF;
-        color: #fff;
-      }
-      .plotting-item-name {
-        line-height: 30px;
-      }
-      .plottingItemNameActive {
-        color: #3B7CFF;
-      }
-    }
-    .plotting-item:hover {
-      cursor: pointer;
-      color: rgb(8, 166, 187);
-    }
   }
 </style>

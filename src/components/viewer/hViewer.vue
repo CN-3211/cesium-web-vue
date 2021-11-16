@@ -6,7 +6,7 @@
 -->
 
 <script lang="ts">
-import { onMounted, defineComponent, ExtractPropTypes, h } from 'vue'
+import { onMounted, defineComponent, ExtractPropTypes, h, reactive } from 'vue'
 import { Viewer } from 'cesium';
 import defaultViewerProps from './defaultViewerProps';
 
@@ -16,10 +16,11 @@ export default defineComponent({
   emits: ["ready"],
   setup(props:ExtractPropTypes<typeof defaultViewerProps>, { emit }) {
     onMounted(() => {
-      const { id, ...options } = props
+      const { id, ...options } = reactive(props);
       const viewer:Viewer = new Viewer(id, options);
+      viewer.cesiumWidget.creditContainer.remove();
       emit("ready", viewer);
-    })
+    });
     return () => h('div', {
       id: props.id,
       class: "h-viewer"

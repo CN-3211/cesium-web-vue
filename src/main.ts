@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-20 21:33:06
+ * @LastEditTime: 2021-11-02 09:42:50
  * @FilePath: \cesium-web-vue\src\main.ts
  */
 import { createApp } from 'vue'
@@ -15,5 +15,5 @@ import { Ion } from 'cesium';
 
 import '@/assets/iconfont/iconfont.css'
 
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2NjU0MGI3NC1iZjM2LTQzNzctYjM3Yy0zMmU2NGQyNTBiM2MiLCJpZCI6MjU5LCJpYXQiOjE2MzA0OTk1NzV9.xNFmNo8X26_nTRRouMiQSbmrOYel9uLf-eXp_q6htb4";
+Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkNmY0NTdiNi0yMWU0LTQ4ODYtOTI4ZC01YTNkMjBmOGJiNWIiLCJpZCI6MjU5LCJpYXQiOjE2MzU3ODA2MDR9.y50NF0p5ljbH7Tau2KiGsZdCNx0Icx905QiljL43nYM";
 createApp(App).use(store).use(router).use(ElementPlus).mount('#app')

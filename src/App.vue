@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-04 14:16:39
+ * @LastEditTime: 2021-11-15 14:51:31
  * @FilePath: \cesium-web-vue\src\App.vue
 -->
 <template>
@@ -17,6 +17,7 @@
               <template #title>3D tiles</template>
               <el-menu-item index="/transform3Dtiles">平移旋转变换</el-menu-item>
               <el-menu-item index="/digTerrian">地表挖掘</el-menu-item>
+              <el-menu-item index="/clipModel">模型剖切</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="基础功能">
               <el-menu-item index="/draw">画点线面</el-menu-item>
@@ -38,6 +39,7 @@
               <el-menu-item index="/sand/classification">Classification</el-menu-item>
               <el-menu-item index="/sand/Clustering">Clustering</el-menu-item>
               <el-menu-item index="/sand/CustomDataSource">CustomDataSource</el-menu-item>
+              <el-menu-item index="/sand/Weather">Weather</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="3">
@@ -87,6 +89,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@import "@/style/index.scss";
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

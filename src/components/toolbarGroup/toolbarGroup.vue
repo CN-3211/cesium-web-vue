@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-10-20 19:33:49
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-21 09:07:15
- * @FilePath: \cesium-web-vue\src\components\toolBarGroup\plotting.vue
+ * @LastEditTime: 2021-11-06 15:22:03
+ * @FilePath: \cesium-web-vue\src\components\toolbarGroup\toolbarGroup.vue
 -->
 <template>
   <div class="toolbar-group">
@@ -10,7 +10,7 @@
       <div
         class="tool-item"
         v-for="item in tools"
-        :key="item"
+        :key="item  + ''"
         @click="onToolClick(item)"
       >
         <!-- <div :class="`iconfont ${item.icon}`"></div> -->
@@ -25,22 +25,25 @@
         <span class="dialog-header-title">{{ activeItem.headerTxt }}</span>
         <span class="dialog-header-close" @click="closeDialog">x</span>
       </div>
-      <Plotting></Plotting>
+      <component :is="activeItem.cmp"></component>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from "vue";
+import { ref, defineComponent, markRaw } from "vue";
 import Plotting from "./plotting/plotting.vue"
+import Analysis from './analysis/analysis.vue';
+import Others from "./others/others.vue"
 
 const tools = ref([
-  { text: "测量", headerTxt: "测量工具", icon: "icon-celiang", active: true },
-  { text: "标绘", headerTxt: "标记工具", icon: "icon-biaohui", active: false },
-  { text: "其他", headerTxt: "其他工具", icon: "icon-qita", active: false }
+  { text: "测量", headerTxt: "测量工具", icon: "icon-celiang", cmp: markRaw(Plotting), active: false },
+  { text: "标绘", headerTxt: "标记工具", icon: "icon-biaohui", cmp: markRaw(Plotting), active: false },
+  { text: "分析", headerTxt: "空间分析", icon: "icon-biaohui", cmp: markRaw(Analysis), active: true },
+  { text: "其他", headerTxt: "其他工具", icon: "icon-qita", cmp: markRaw(Others), active: false }
 ]);
 const isDialogShow = ref(true);
-let activeItem = ref(tools.value[0]);
+let activeItem = ref(tools.value[2]);
 
 export default defineComponent({
   setup() {
@@ -64,7 +67,9 @@ export default defineComponent({
     };
   },
   components: {
-    Plotting
+    Plotting,
+    Others,
+    Analysis
   }
 });
 </script>

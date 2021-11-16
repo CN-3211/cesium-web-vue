@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-10-09 14:54:48
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-09 21:07:15
+ * @LastEditTime: 2021-11-03 22:02:05
  * @FilePath: \cesium-web-vue\extern-projects\webGL-practice\Advanced\stencilBuffer.html
 -->
 
@@ -101,6 +101,16 @@
       .4, -.5, 0,
       .3, .6, 0
     ];
+    var stencilVertex2 = [
+      -.3, 0, 0,
+      .3, 0, 0,
+      0, .2, 0,
+    ];
+    var stencilVertex3 = [
+      -.4, -.4, 0,
+      .2, -.5, 0,
+      .3, .6, 0,
+    ];
 
     function setupBufferAndDraw() {
       // draw the first triangle as stencil
@@ -110,34 +120,64 @@
         1, 1, 1, 1
       ];
 
+      var aColorPosition = gl.getAttribLocation(glProgram, 'aColor');
+      var aVertexPosition = gl.getAttribLocation(glProgram, 'aPos');
+      var colorBuffer = gl.createBuffer();
+      var vertexBuffer = gl.createBuffer();
+
       // Always pass test
-      gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+      gl.stencilFunc(gl.ALWAYS, 2, 0xff);
       gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
       gl.stencilMask(0xff);
       gl.clear(gl.STENCIL_BUFFER_BIT);
       // No need to display the triangle
       gl.colorMask(0, 0, 0, 0);
 
-      var colorBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(color), gl.STATIC_DRAW);
 
-      var aColorPosition = gl.getAttribLocation(glProgram, 'aColor');
       gl.vertexAttribPointer(aColorPosition, 4, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(aColorPosition);
 
-      var vertexBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(stencilVertex), gl.STATIC_DRAW);
 
-      var aVertexPosition = gl.getAttribLocation(glProgram, 'aPos');
       gl.vertexAttribPointer(aVertexPosition, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(aVertexPosition);
 
       gl.drawArrays(gl.TRIANGLES, 0, stencilVertex.length / 3);
 
+
+
+      /** 开始第二次模板缓冲 */
+
+
+
+      // Always pass test
+      gl.stencilFunc(gl.EQUAL, 2, 0xff);
+      gl.stencilOp(gl.KEEP, gl.KEEP, gl.DECR);
+      gl.stencilMask(0xff);
+      gl.clear(gl.STENCIL_BUFFER_BIT);
+      // No need to display the triangle
+      gl.colorMask(0, 0, 0, 0);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(color), gl.STATIC_DRAW);
+
+      gl.vertexAttribPointer(aColorPosition, 4, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(aColorPosition);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(stencilVertex2), gl.STATIC_DRAW);
+
+      gl.vertexAttribPointer(aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(aVertexPosition);
+
+      gl.drawArrays(gl.TRIANGLES, 0, stencilVertex.length / 3);
+
+
       // Pass test if stencil value is 1
-      gl.stencilFunc(gl.NOTEQUAL, 1, 0xFF);
+      gl.stencilFunc(gl.EQUAL, 1, 0xFF);
       gl.stencilMask(0x00);
       gl.colorMask(1, 1, 1, 1);
       // draw the clipped triangle
@@ -146,6 +186,11 @@
         0, 1, 0, 1,
         0, 0, 1, 1
       ];
+      // color = [
+      //   1, 1, 1, 1,
+      //   1, 1, 1, 1,
+      //   1, 1, 1, 1
+      // ];
       gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(color), gl.STATIC_DRAW);
 
@@ -153,6 +198,9 @@
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertex), gl.STATIC_DRAW);
 
       gl.drawArrays(gl.TRIANGLES, 0, vertex.length / 3);
+
+      
+      
     }
 
     window.onload = function () {

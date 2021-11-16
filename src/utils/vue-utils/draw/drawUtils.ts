@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 18:14:09
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-08-04 17:52:08
+ * @LastEditTime: 2021-11-08 22:38:10
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\drawUtils.ts
  */
 import {
@@ -11,13 +11,24 @@ import {
   ClassificationType,
   Color,
   defined,
-  Entity, HeightReference, HorizontalOrigin,
+  Entity,
+  HeightReference,
+  HorizontalOrigin,
   PolygonHierarchy,
   Ray,
   ScreenSpaceEventHandler,
-  ScreenSpaceEventType, VerticalOrigin,
-  Viewer
+  ScreenSpaceEventType,
+  VerticalOrigin,
+  Viewer,
+  clone
 } from 'cesium'
+
+import { ref, Ref, watchEffect } from 'vue';
+
+
+// 选择绘制的模式是在地形上绘制，还是在3dtiles上绘制
+export const CESIUM_3D_TILE = 'CESIUM_3D_TILE'
+export const TERRAIN = 'TERRAIN'
 
 class DrawBillboard{
   static _viewer;
@@ -47,14 +58,13 @@ class DrawBillboard{
         scale: 0.2,
         horizontalOrigin: HorizontalOrigin.CENTER,	//获取或设置此广告牌的水平原点，确定该广告牌是否为在其锚定位置的左侧，中心或右侧。
         verticalOrigin: VerticalOrigin.BOTTOM,		//获取或设置此广告牌的垂直原点，以确定该广告牌是否为到其锚定位置的上方，下方或中心。
-        heightReference:HeightReference.CLAMP_TO_GROUND,	//获取或设置此广告牌的高度参考
+        heightReference:HeightReference.NONE,	//获取或设置此广告牌的高度参考
         disableDepthTestDistance:Number.MAX_VALUE				//获取或设置与相机的距离，在深度处禁用深度测试，例如，以防止剪切地形。设置为零时，将始终应用深度测试。设置为Number.POSITIVE_INFINITY时，永远不会应用深度测试。
       }
     });
   }
   getCatesian3FromPX(px:Cartesian2):Cartesian3 {
-    const ray:Ray = DrawBillboard._viewer.camera.getPickRay(px);
-    const cartesian:Cartesian3|undefined = DrawBillboard._viewer.scene.globe.pick(ray, DrawBillboard._viewer.scene);
+    const cartesian = DrawBillboard._viewer.scene.pickPosition(px);
     if(!cartesian) {
       throw new Error("未获取到正确坐标");
     }
@@ -66,48 +76,70 @@ class DrawBillboard{
 
 }
 
+interface polylineOptions {
+  drawType: string
+}
+
 class DrawPolyline {
   static _viewer: Viewer;
   handler: ScreenSpaceEventHandler;
-  polyline: Entity|undefined;
-  positions: Cartesian3[];
-
-  constructor(viewer: Viewer) {
+  polyline: Entity|undefined = undefined;
+  positions: Cartesian3[] = [];
+  positionsGroup: (Cartesian3[])[] = [];
+  polylineGroup: Entity[] = [];
+  drawType: string = TERRAIN;
+  constructor(viewer: Viewer, options?: polylineOptions) {
     DrawPolyline._viewer = viewer;
     this.handler = new ScreenSpaceEventHandler(DrawPolyline._viewer.scene.canvas);
-    this.polyline = undefined;
-    this.positions = [];
+    
+    options && this.initOptions(options)
   }
-
-  startCreate(callback?: (params: Cartesian3[]) => void): void {
+  initOptions(options: polylineOptions) {
+    Object.keys(options).forEach(item => {
+      this[item] = options[item];
+    })
+  }
+  /**
+   * @description: 开始绘制
+   * @param {function} callback1 - 左键点击后的回调
+   * @param {function} callback2 - 右键结束后的回调
+   * @return {*}
+   */  
+  startCreate(callback1?: (params: Cartesian3[]) => void, callback2?: (params: Cartesian3[]) => void): void {
     this.handler.setInputAction(Event => {
-      const cartesian:Cartesian3 = this.getCatesian3FromPX(Event.position);
+      const cartesian:Cartesian3 = this.getCatesian3FromPX(Event.position, this.drawType);
       if(this.positions.length === 0) {
         this.positions.push(cartesian.clone())
       }
 
       this.positions.push(cartesian);
-    }, ScreenSpaceEventType.LEFT_CLICK)
+      callback1 && callback1(clone(this.positions));
+    }, ScreenSpaceEventType.LEFT_CLICK);
   
     this.handler.setInputAction(Event => {
       if(!this.positions.length) {
         return;
       }
-      const cartesian = this.getCatesian3FromPX(Event.endPosition)
+      const cartesian = this.getCatesian3FromPX(Event.endPosition, this.drawType)
       if(this.positions.length === 2 && !defined(this.polyline)) {
-        this.polyline = this.createPolyline();
+        const _positions = this.positions;
+        this.polyline = this.createPolyline(_positions);
       }
       if (this.polyline) {
 				this.positions.pop();
 				this.positions.push(cartesian);
 			}
-    }, ScreenSpaceEventType.MOUSE_MOVE)
-    this.handler.setInputAction(Event => {
-      const cartesian = this.getCatesian3FromPX(Event.position);
-      this.handler.destroy();
+    }, ScreenSpaceEventType.MOUSE_MOVE);
+    this.handler.setInputAction(() => {
       this.positions.pop();
-      this.positions.push(cartesian);
-      callback && callback(this.positions);
+      this.positionsGroup.push(this.positions);
+      if(this.polyline) {
+        this.polylineGroup.push(this.polyline);
+      }
+      
+      this.positions = [];
+      this.polyline = undefined;
+      callback2 && callback2(this.positions);
     }, ScreenSpaceEventType.RIGHT_CLICK);
     return;
   }
@@ -116,23 +148,22 @@ class DrawPolyline {
    * @param {Cartesian2} px
    * @return {Cartesian3} cartesian
    */
-  getCatesian3FromPX(px:Cartesian2):Cartesian3 {
-    const ray:Ray = DrawPolyline._viewer.camera.getPickRay(px);
-    const cartesian:Cartesian3|undefined = DrawPolyline._viewer.scene.globe.pick(ray, DrawPolyline._viewer.scene);
-    if(!cartesian) { 
+  getCatesian3FromPX(px: Cartesian2, type: string):Cartesian3 {
+    const cartesian = DrawPolyline._viewer.scene.pickPosition(px);
+    if(!cartesian) {
       throw new Error("未获取到正确坐标");
     }
     return cartesian
   }
-  createPolyline():Entity {
+  createPolyline(_positions: Cartesian3[]):Entity {
     return DrawPolyline._viewer.entities.add({
       polyline: {
-        positions: new CallbackProperty(() => this.positions, false),
+        positions: new CallbackProperty(() => _positions, false),
         material: Color.YELLOW,
         width: 3,
         show: true,
         clampToGround: true,
-        classificationType: ClassificationType.TERRAIN
+        classificationType: ClassificationType[this.drawType]
       }
     })
   }
@@ -150,23 +181,39 @@ class DrawPolyline {
   }
 }
 
+interface polygonOptions {
+  drawType: string
+}
 class DrawPolygon {
+  static _viewer: Viewer;
   handler: ScreenSpaceEventHandler;
   positions: Cartesian3[];
   polyline: Entity|undefined;
   polygon: Entity|undefined;
-  static _viewer: Viewer;
-  constructor(viewer: Viewer) {
+  positionsGroup: (Cartesian3[])[];
+  polygonGroup: Entity[];
+  drawType:string;
+  constructor(viewer: Viewer, options?: polygonOptions) {
     DrawPolygon._viewer = viewer;
     this.handler = new ScreenSpaceEventHandler(DrawPolygon._viewer.scene.canvas);
     this.positions = [];
     this.polyline = undefined;
     this.polygon = undefined;
+    
+    this.positionsGroup = [];
+    this.polygonGroup = [];
+    this.drawType = 'TERRAIN';
+    options && this.initOptions(options)
+  }
+  initOptions(options: polygonOptions) {
+    Object.keys(options).forEach(item => {
+      this[item] = options[item];
+    })
   }
   startCreate(callback?) {
     /** 点击开始 **/
     this.handler.setInputAction(event => {
-      const clickPosition = this.getCatesian3FromPX(event.position);
+      const clickPosition = this.getCatesian3FromPX(event.position, this.drawType);
       this.positions.push(clickPosition);
     }, ScreenSpaceEventType.LEFT_CLICK)
 
@@ -175,7 +222,7 @@ class DrawPolygon {
       if(!this.positions.length) {
         return;
       }
-      const movePosition = this.getCatesian3FromPX(event.endPosition);
+      const movePosition = this.getCatesian3FromPX(event.endPosition, this.drawType);
       if(this.positions.length > 2) {
         if(this.polygon) {
           this.positions.pop();
@@ -183,7 +230,9 @@ class DrawPolygon {
         } else {
           this.positions.pop();
           this.positions.push(movePosition);
-          this.createPolygon();
+          // 仅仅是改变指针
+          const _positons = this.positions;
+          this.createPolygon(_positons);
         }
       } else {
         if(this.polyline) {
@@ -191,48 +240,59 @@ class DrawPolygon {
           this.positions.push(movePosition);
         } else {
           this.positions.push(movePosition);
-          this.createPolyLine();
+          const _positons = this.positions;
+          this.createPolyLine(_positons);
         }
       }
       
     }, ScreenSpaceEventType.MOUSE_MOVE)
     /** 右键结束 **/
     this.handler.setInputAction(event => {
-      const rClickPosition = this.getCatesian3FromPX(event.position);
-
       this.positions.pop();
-      this.positions.push(rClickPosition);
+      
+      // 这一段防止长度为2时。右键中止绘制后地图上留下线
+      if(this.positions.length === 2) {
+        this.positions.pop();
+      }
+      
+      this.positionsGroup.push(this.positions);
+      if(this.polygon) {
+        this.polygonGroup.push(this.polygon);
+      }
   
-      this.handler.destroy();
+      this.positions = [];
+      this.polyline = undefined;
+      this.polygon = undefined;
+  
       callback && callback(this.positions);
     }, ScreenSpaceEventType.RIGHT_CLICK)
   }
-  getCatesian3FromPX(px:Cartesian2):Cartesian3 {
-    const ray:Ray = DrawPolygon._viewer.camera.getPickRay(px);
-    const cartesian:Cartesian3|undefined = DrawPolygon._viewer.scene.globe.pick(ray, DrawPolygon._viewer.scene);
-    if(!cartesian) { 
+  getCatesian3FromPX(px: Cartesian2, type: string):Cartesian3 {
+    const cartesian = DrawPolygon._viewer.scene.pickPosition(px);
+    if(!cartesian) {
       throw new Error("未获取到正确坐标");
     }
     return cartesian
   }
-  createPolyLine() {
+  createPolyLine(_positions: Cartesian3[]) {
     this.polyline = DrawPolygon._viewer.entities.add({
       polyline: {
-        positions: new CallbackProperty(() => this.positions.concat(this.positions[0]), false),
+        positions: new CallbackProperty(() => _positions.length ? _positions.concat(_positions[0]) : _positions, false),
+        // positions: new CallbackProperty(() => this.positions.length ? this.positions.concat(this.positions[0]) : this.positions, false),
         material: new Color(0.1, 0.5, 0.9, 0.8),
         width: 3,
         show: true,
         clampToGround: true,
-        classificationType: ClassificationType.TERRAIN
+        classificationType: ClassificationType[this.drawType]
       }
     })
   }
-  createPolygon() {
+  createPolygon(_positions: Cartesian3[]) {
     this.polygon = DrawPolygon._viewer.entities.add({
       polygon: {
-        hierarchy: new CallbackProperty(() => new PolygonHierarchy(this.positions), false),
+        hierarchy: new CallbackProperty(() => new PolygonHierarchy(_positions), false),
 				material: new Color(0.1, 0.5, 0.9, 0.4),
-        classificationType: ClassificationType.TERRAIN
+        classificationType: ClassificationType[this.drawType]
       }
     })
   }
