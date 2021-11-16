@@ -1,13 +1,14 @@
 /*
  * @Date: 2021-06-03 09:53:17
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-09-27 16:52:27
+ * @LastEditTime: 2021-11-15 20:03:13
  * @FilePath: \cesium-web-vue\vue.config.js
  */
 const webpack = require('webpack')
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
+  publicPath: "./",
   configureWebpack: {
     plugins: [
       // Copy Cesium Assets, Widgets, and Workers to a static directory
@@ -17,7 +18,8 @@ module.exports = {
       new CopyWebpackPlugin([{from: "node_modules/cesium/Build/Cesium/Widgets", to: "Widgets"}]),
       new webpack.DefinePlugin({
         // Define relative base path in cesium for loading assets
-        CESIUM_BASE_URL: JSON.stringify("")
+        CESIUM_BASE_URL: JSON.stringify("./") // 相对路径build可用
+        // CESIUM_BASE_URL: JSON.stringify("") // 绝对路径dev环境可用
       })
     ],
     module: {

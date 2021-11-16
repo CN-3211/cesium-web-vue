@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    // "this" 隐式具有类型 "any"，因为它没有类型注释解决方案
+    "noImplicitThis": false,
     // lang="ts"的script标签中引入JS报错解决方案
     "noImplicitAny": false,
     "target": "esnext",

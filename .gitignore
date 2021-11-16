@@ -24,3 +24,5 @@ pnpm-debug.log*
 *.obj
 *.mtl
 3DTiles
+*.kml
+*.kmz
