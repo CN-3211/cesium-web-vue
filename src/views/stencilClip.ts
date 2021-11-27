@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-14 10:32:09
+ * @LastEditTime: 2021-11-20 11:17:03
  * @FilePath: \cesium-web-vue\src\views\stencilClip.ts
  */
 import * as THREE from 'three';
@@ -35,6 +35,9 @@ export default class stencilClip {
   clipOptions: clipOptions
   planes: THREE.Plane[][] = [];
   planeObjects: THREE.Mesh[][] = [];
+  selectPoints: THREE.Vector3[] = [];
+  testCenter: THREE.Vector3 = new THREE.Vector3();
+  testNumber = 1;
   constructor(scene: THREE.Scene, clipOptions: clipOptions) {
     this._scene = scene;
     this.objAndMtls = [];
@@ -102,6 +105,7 @@ export default class stencilClip {
         layerModel.traverse((child: THREE.Object3D) => {
           if (child instanceof THREE.Mesh) {
             child.material.clippingPlanes = clippingPlanes;
+            // child.material.clipIntersection = true;
             child.castShadow = true; // ??
             child.renderOrder = 6; // ??
           }
@@ -109,7 +113,8 @@ export default class stencilClip {
         if(this.clipOptions.threeFaceClip) { 
           this.clipOptions.threeFaceClip?.onlyShowPlanes && this._scene.remove(this.modelGroup)
         }
-        const planeGeom = new THREE.PlaneGeometry(100000, 100000);
+        // const planeGeom = new THREE.PlaneGeometry(10000, this.testNumber);
+        const planeGeom = new THREE.PlaneGeometry(10000, 10000);
 
         const plane = this.planes[x][i];
         layerModel.children.forEach((itemModel) => {
@@ -141,17 +146,30 @@ export default class stencilClip {
           stencilWrite: true,
           stencilRef: 0,
           stencilFunc: THREE.NotEqualStencilFunc,
+          // clipIntersection: true,
         });
         this.clipOptions.clipEachOther && (planeMat.clippingPlanes = result)
         const po = new THREE.Mesh(planeGeom, planeMat);
+        console.log('po', po);
         po.onAfterRender = (renderer) => {
           renderer.clearStencil();
         };
         po.renderOrder = i + 2.2;
         this.poGroup.add(po);
+
         this.planeObjects[x].push(po);
       }
     }
+    const tmp = new THREE.Vector3();
+    this.poGroup.getWorldPosition(tmp)
+    console.log('this.poGroup.getWorldPosition', tmp);
+    console.log('this.poGroup.normal', this.poGroup.up);
+    setTimeout(() => {
+      // this.poGroup.position.setX(this.testCenter.x);
+      // this.poGroup.position.setY(this.testCenter.y);
+    }, 2000)
+    console.log('this.poGroup.position2', this.poGroup.position);
+    console.log('this.poGroup', this.poGroup);
   }
   /**
    * @description: 在切割后的模型所在位置创建模板缓冲区
@@ -198,6 +216,57 @@ export default class stencilClip {
 
     return group;
   }
+  selectRouter2(container: HTMLElement, camera: THREE.PerspectiveCamera) {
+    const selectPolyline: THREE.Vector3[] = [new THREE.Vector3(0.5, 2, 0), new THREE.Vector3(1.2, 2, 0)];
+    console.log('object :>> ', selectPolyline);
+    this.testCenter.x = (selectPolyline[0].x + selectPolyline[1].x)/2;
+    this.testCenter.y = (selectPolyline[0].y + selectPolyline[1].y)/2;
+    this.testNumber = selectPolyline[1].clone().sub(selectPolyline[0]).length();
+    const test = new THREE.Vector3(selectPolyline[1].x, selectPolyline[1].y, selectPolyline[1].z - 1)
+    const normalize = selectPolyline[1].clone().sub(selectPolyline[0]).cross(test.sub(selectPolyline[0])).normalize();
+    const distance = (-selectPolyline[0].dot(normalize)) / (Math.sqrt(normalize.x * normalize.x + normalize.y * normalize.y + normalize.z * normalize.z));
+    console.log('distance', distance);
+    const planex = new THREE.Plane(new THREE.Vector3(normalize.x, normalize.y, normalize.z), distance);
+    this.planes.push([]);
+    this.planeObjects.push([]);
+    for (let i = 0; i < this.objAndMtls.length; i++) {
+      this.planes[this.planes.length - 1].push(planex);
+    }
+
+    const material = new THREE.LineBasicMaterial({
+      color: 0x0000ff,
+      
+    });
+    const geometry = new THREE.BufferGeometry().setFromPoints( selectPolyline );
+    const line = new THREE.Line( geometry, material );
+    this.lineGroup.add( line );
+  }
+  createBoxStencil(selectPolyline: THREE.Vector3[]) {
+
+    const geometry = new THREE.BoxGeometry( this.testNumber, this.testNumber, this.testNumber );
+    const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+    material.colorWrite = false;
+    material.depthWrite = false;
+    material.depthTest = false;
+    material.colorWrite = false;
+    material.stencilWrite = true;
+    material.stencilFunc = THREE.AlwaysStencilFunc;
+    const mat0 = material.clone();
+    mat0.side = THREE.BackSide;
+    // IncrementWrapStencilOp将当前stencil value增加1
+    mat0.stencilZPass = THREE.IncrementWrapStencilOp;
+
+    const mat1 = material.clone();
+    mat1.side = THREE.FrontSide;
+    mat1.stencilZPass = THREE.DecrementWrapStencilOp;
+
+    const cube = new THREE.Mesh( geometry, material );
+    cube.position.set(this.testCenter.x, this.testCenter.y, this.testCenter.z);
+    cube.lookAt(new THREE.Vector3(0, 0, 0))
+    this._scene.add( cube );
+    console.log('',111);
+  }
+
   selectRouter(container: HTMLElement, camera: THREE.PerspectiveCamera) {
     const mouse = new THREE.Vector2();
     const selectPolyline: THREE.Vector3[] = [];
@@ -208,15 +277,22 @@ export default class stencilClip {
       const raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
       const intersects = raycaster.intersectObjects(this.modelGroup.children[0].children, true);
       if (intersects.length > 0) {
-          const point=intersects[0].point; //射线在模型表面拾取的点坐标
+          const point = intersects[0].point; //射线在模型表面拾取的点坐标
+        console.log('intersects', intersects);
           selectPolyline.push(point);
       }
   
       if(selectPolyline.length === 2) {
-        
+        console.log('selectPolyline :>> ', selectPolyline);
+        this.testCenter.x = (selectPolyline[0].x + selectPolyline[1].x)/2;
+        this.testCenter.y = (selectPolyline[0].y + selectPolyline[1].y)/2;
+        this.testNumber = selectPolyline[1].clone().sub(selectPolyline[0]).length();
         const test = new THREE.Vector3(selectPolyline[1].x, selectPolyline[1].y, selectPolyline[1].z - 1)
-        const normalize = selectPolyline[1].clone().sub(selectPolyline[0]).cross(test.sub(selectPolyline[0])).normalize();
+        console.log('sub :>> ', selectPolyline[1].clone().sub(selectPolyline[0]));
+        const normalize = selectPolyline[1].clone().sub(selectPolyline[0]).cross(test.sub(selectPolyline[0])).normalize().negate();
+        console.log('normalize :>> ', normalize);
         const distance = (-selectPolyline[0].dot(normalize)) / (Math.sqrt(normalize.x * normalize.x + normalize.y * normalize.y + normalize.z * normalize.z));
+        console.log('distance', distance);
         const planex = new THREE.Plane(new THREE.Vector3(normalize.x, normalize.y, normalize.z), distance);
         this.planes.push([]);
         this.planeObjects.push([]);
@@ -227,18 +303,34 @@ export default class stencilClip {
         const material = new THREE.LineBasicMaterial({
           color: 0x0000ff
         });
+
+       
+
         const geometry = new THREE.BufferGeometry().setFromPoints( selectPolyline );
         const line = new THREE.Line( geometry, material );
         this.lineGroup.add( line );
+        // this.createBoxStencil(selectPolyline)
         selectPolyline.shift();
       }
-    }
+    };
     container.addEventListener('dblclick', dbEvent, false);
   }
   endSelectRouter() {
     this._scene.remove(this.lineGroup);
-    this.clipModel()
+    this.clipModel();
     this._scene.remove(this.modelGroup);
+    // setTimeout(() => {
+    //   this.stencilGroup.visible = false;
+    //   this.modelGroup.children.forEach(layerModel => {
+    //     layerModel.traverse((child: THREE.Object3D) => {
+    //       if (child instanceof THREE.Mesh) {
+    //         child.material.clippingPlanes = '';
+    //         child.castShadow = true; // ??
+    //         child.renderOrder = 6; // ??
+    //       }
+    //     });
+    //   })
+    // }, 5000)
   }
   changeClippingPlaneShowModel(mutualed: boolean) {
     

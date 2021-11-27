@@ -1,10 +1,10 @@
 /*
  * @Date: 2021-06-17 16:01:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-17 16:11:52
+ * @LastEditTime: 2021-11-22 11:37:40
  * @FilePath: \cesium-web-vue\src\constant\index.ts
  */
-export const enum direction {
+const enum direction {
   LEFT = "Left",
   RIGHT = "Right",
   TOP = "Top",
@@ -14,3 +14,8 @@ export const enum direction {
   SOUTH = "South",
   NORTH = "North"
 }
+
+const CESIUM_3D_TILE = 'CESIUM_3D_TILE'
+const TERRAIN = 'TERRAIN'
+
+export { direction, CESIUM_3D_TILE, TERRAIN }

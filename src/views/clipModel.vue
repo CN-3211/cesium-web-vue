@@ -1,19 +1,13 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-25 18:23:30
+ * @LastEditTime: 2021-10-18 21:25:39
  * @FilePath: \cesium-web-vue\src\views\clipModel.vue
 -->
 <template>
   <div class="clip-Model">
     <HViewer @ready="onViewerReady"></HViewer>
-    <div class="container">
-      <!-- <el-button @click="clipTop">切顶部</el-button>
-      <el-button @click="clipBottom">切底部</el-button>
-      <el-button @click="clipEast">切东向</el-button>
-      <el-button @click="clipWest">切西向</el-button>
-      <el-button @click="clipSouth">切南向</el-button>
-      <el-button @click="clipNorth">切北向</el-button> -->
+    <!-- <div class="container">
       <div class="block">
         <span class="demonstration">顶部裁剪距离</span>
         <el-slider v-model="state.targetTop" @input="changeTargetTop" :min="-80" :max="150"></el-slider>
@@ -24,13 +18,13 @@
       </div>
       <div class="block">
         <span class="demonstration">西部裁剪距离</span>
-        <el-slider v-model="state.targetWest" @input="changeTargetWest" :min="0" :max="1000"></el-slider>
+        <el-slider v-model="state.targetWest" @input="changeTargetWest" :min="-2000" :max="2000"></el-slider>
       </div>
       <div class="block">
         <span class="demonstration">东部裁剪距离</span>
         <el-slider v-model="state.targetEast" @input="changeTargetEast" :min="0" :max="500"></el-slider>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -68,31 +62,16 @@ export default defineComponent({
     });
     const onViewerReady = (_viewer:Cesium.Viewer) => {
       viewer = _viewer;
-      viewer.scene.globe.depthTestAgainstTerrain = true;
+      viewer.scene.globe.show = false;
       tileset = viewer.scene.primitives.add(
         new Cesium.Cesium3DTileset({
-          url: "3DTiles/stratum/tileset.json",
-          clippingPlanes: createClippingPlanes("All")
+          url: "3DTiles/hzhnhgeo/tileset.json",
+          backFaceCulling: false,
+          clippingPlanes: createClippingPlanes(direction.WEST)
         })
       );
     }
     onMounted(() => {
-      tileset.readyPromise.then((tileset) => {
-        // 模型偏移
-        let boundingSphereCenter = tileset.boundingSphere.center.clone()
-        let modelMatrix = tileset.modelMatrix.clone()
-        let trans = new transform(boundingSphereCenter, modelMatrix);
-        const tmpMatrix = new Cesium.Matrix4();
-        Cesium.Matrix4.multiply(
-          trans.translation(109.3062, 21.66081, 500),
-          trans.rotation(17.9, -7.3, 0),
-          tmpMatrix
-        );
-        
-        tileset.modelMatrix = tmpMatrix;
-
-
-      });
 
       viewer.zoomTo(tileset);
     });

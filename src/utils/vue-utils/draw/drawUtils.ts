@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 18:14:09
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-08 22:38:10
+ * @LastEditTime: 2021-11-25 20:17:16
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\drawUtils.ts
  */
 import {
@@ -163,7 +163,8 @@ class DrawPolyline {
         width: 3,
         show: true,
         clampToGround: true,
-        classificationType: ClassificationType[this.drawType]
+        classificationType: ClassificationType[this.drawType],
+        zIndex: 100000
       }
     })
   }
@@ -210,11 +211,12 @@ class DrawPolygon {
       this[item] = options[item];
     })
   }
-  startCreate(callback?) {
+  startCreate(callback1?: (params: Cartesian3[]) => void, callback2?: (params: Cartesian3[]) => void) {
     /** 点击开始 **/
     this.handler.setInputAction(event => {
       const clickPosition = this.getCatesian3FromPX(event.position, this.drawType);
       this.positions.push(clickPosition);
+      callback1 && callback1(clone(this.positions));
     }, ScreenSpaceEventType.LEFT_CLICK)
 
     /** 鼠标移动 **/
@@ -259,12 +261,12 @@ class DrawPolygon {
       if(this.polygon) {
         this.polygonGroup.push(this.polygon);
       }
+      callback2 && callback2(clone(this.positions));
   
       this.positions = [];
       this.polyline = undefined;
       this.polygon = undefined;
   
-      callback && callback(this.positions);
     }, ScreenSpaceEventType.RIGHT_CLICK)
   }
   getCatesian3FromPX(px: Cartesian2, type: string):Cartesian3 {
@@ -311,16 +313,4 @@ class DrawPolygon {
   }
 }
 
-class DrawOn3Dtiles {
-  static _viewer: Viewer
-  // handler: ScreenSpaceEventHandler
-  constructor(viewer) {
-    DrawOn3Dtiles._viewer = viewer;
-    
-  }
-  startCreate() {
-    console.log('111 :>> ', 111);
-  }
-}
-
-export { DrawPolyline, DrawPolygon, DrawBillboard }
+export { DrawPolyline, DrawPolygon, DrawBillboard, polylineOptions }

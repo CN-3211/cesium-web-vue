@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-06-17 18:31:36
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-06-17 19:48:34
- * @FilePath: \cesium-web-vue\src\components\utilsComponents\defaultViewerProps.ts
+ * @LastEditTime: 2021-11-26 08:53:11
+ * @FilePath: \cesium-web-vue\src\components\viewer\defaultViewerProps.ts
  */
 import { PropType } from 'vue';
 import { ClockViewModel, ProviderViewModel, ImageryProvider, TerrainProvider, SkyBox, SkyAtmosphere, MapProjection, Globe, DataSourceCollection } from 'cesium';
@@ -11,6 +11,10 @@ export default {
   id: {
     type: String,
     default: "cesiumContainer"
+  },
+  geocoder: {
+    type: Boolean,
+    default: false
   },
   cesiumPath: String,
   animation: {
@@ -142,7 +146,7 @@ export default {
   },
   showCredit: {
     type: Boolean,
-    default: true
+    default: false
   },
   accessToken: String,
   navigation: {

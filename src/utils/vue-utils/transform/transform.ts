@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-10 09:13:02
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-10 19:38:44
+ * @LastEditTime: 2021-11-27 13:55:07
  * @FilePath: \cesium-web-vue\src\utils\vue-utils\transform\transform.ts
  */
 import * as Cesium from 'cesium'
@@ -60,7 +60,7 @@ export default class transform {
     const my: Cesium.Matrix3 = Cesium.Matrix3.fromRotationY(Cesium.Math.toRadians(yAngle));
     const mz: Cesium.Matrix3 = Cesium.Matrix3.fromRotationZ(Cesium.Math.toRadians(zAngle));
 
-    const m:Cesium.Matrix3 = new Cesium.Matrix3();
+    const m: Cesium.Matrix3 = new Cesium.Matrix3();
     Cesium.Matrix3.multiply(mx, my, m);
     Cesium.Matrix3.multiply(m, mz, m)
 

@@ -1,23 +1,25 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-13 22:14:51
+ * @LastEditTime: 2021-11-20 11:12:22
  * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
 -->
 <template>
   <div class="threeJsClipObjModelStencil" id="threeJsClipObjModelStencil">
     <div class="controlGroup">
-      <el-tabs type="border-card" @tab-click="onTabClicked">
+      <el-tabs type="border-card">
         <el-tab-pane v-for="tab in tabs" :key="tab" :label="tab">
           <el-switch v-show="tab === '三面裁剪'" v-model="isShowPlanes" active-text="显示切面" inactive-text="显示模型"></el-switch>
           <el-switch v-show="tab === '自定义切割'" v-model="isSelecting" active-text="开始选择" inactive-text="停止选择"></el-switch>
           <div>
             <span class="demonstration">X平面距离</span>
-            <el-slider v-model="distance.x" :min="-1" :max="1" :step="0.001" @input="onSlideX"></el-slider>
+            <el-slider v-model="distance.x" :min="-5" :max="5" :step="0.001" @input="onSlideX"></el-slider>
             <span class="demonstration">Y平面距离</span>
-            <el-slider v-model="distance.y" :min="-1" :max="1" :step="0.001" @input="onSlideY"></el-slider>
+            <el-slider v-model="distance.y" :min="-5" :max="5" :step="0.001" @input="onSlideY"></el-slider>
             <span class="demonstration">Z平面距离</span>
             <el-slider v-model="distance.z" :min="-3" :max="3" :step="0.001" @input="onSlideZ"></el-slider>
+            <span class="demonstration">Z轴拉伸</span>
+            <el-slider v-model="zStretching" :min="1" :max="20" :step="1" @input="onStretchingZ"></el-slider>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -37,16 +39,36 @@ const distance = reactive({
   z: 0
 });
 
+const zStretching = ref(0)
+
 let renderer: THREE.WebGLRenderer;
 let scene: THREE.Scene;
 let camera: THREE.PerspectiveCamera;
-const modelNameArr = [ 
- '1-1', // 黄色片片
- '2-1', // 粉色片片
- '3-1', // 金色片片
- '4-1', // 绿色部分Z轴拉伸成块块，部分片片
- '4-2', // 粉色块块
-];
+const modelNameArr = [ '①',
+  '②-1',
+  '②-10',
+  '②-2',
+  '②-3',
+  '②-4',
+  '②-5',
+  '②-6',
+  '②-7',
+  '②-8',
+  '②-9',
+  '③',
+  '④-1',
+  '④-2',
+  '④-3',
+  '⑤',
+  '⑥-1',
+  '⑥-2',
+  '⑦-1',
+  '⑦-2',
+  '⑦-3',
+  '⑧',
+  '⑨',
+  '⑩',
+  '⑾' ];
 
 
 let stencilClipIns: stencilClip; 
@@ -83,10 +105,13 @@ export default defineComponent({
       })
     }
 
-    const onTabClicked = (vm) => {
-      console.log('name :>> ', vm.props.label);
+    const onStretchingZ = () => {
+      if(stencilClipIns) {
+        stencilClipIns.modelGroup.scale.set(1, 1, zStretching.value);
+        stencilClipIns.stencilGroup.scale.set(1, 1, zStretching.value);
+      }
     }
-    return { distance, onSlideX, onSlideY, onSlideZ, tabs, negated,  isClipMutual, onTabClicked, isSelecting, isShowPlanes }
+    return { distance, onSlideX, onSlideY, onSlideZ, tabs, negated,  isClipMutual, isSelecting, isShowPlanes, zStretching, onStretchingZ }
   },
 });
 
@@ -130,11 +155,11 @@ async function init(): Promise<void> {
       onlyShowPlanes: isShowPlanes.value,
       negateX: false,
       negateY: false,
-      negateZ: true
+      negateZ: false
     },
     clipEachOther: true
   });
-  await stencilClipIns.loadModels("obj/建模深度60米三维地质模型/", modelNameArr);
+  await stencilClipIns.loadModels("obj/惠南湖分层模型/", modelNameArr);
   const box = new THREE.Box3();
   const groupCenter = new THREE.Vector3()
   box.expandByObject(stencilClipIns.modelGroup);
@@ -142,11 +167,11 @@ async function init(): Promise<void> {
   stencilClipIns.modelGroup.translateX(-groupCenter.x);
   stencilClipIns.modelGroup.translateY(-groupCenter.y);
   stencilClipIns.modelGroup.translateZ(-groupCenter.z);
-  // stencilClipIns.modelGroup.scale.set(1, 1, 10);
+
   stencilClipIns.stencilGroup.translateX(-groupCenter.x);
   stencilClipIns.stencilGroup.translateY(-groupCenter.y);
   stencilClipIns.stencilGroup.translateZ(-groupCenter.z);
-  // stencilClipIns.stencilGroup.scale.set(1, 1, 10);
+
 
   /* 监听拾取点击坐标开始 */
   watch(isSelecting, val => {
