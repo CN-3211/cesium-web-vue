@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-11-05 20:44:03
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-13 16:56:22
+ * @LastEditTime: 2021-11-22 15:39:03
  * @FilePath: \cesium-web-vue\src\components\toolbarGroup\analysis\sectionAnalysis.ts
  */
 import * as echarts from 'echarts/core';
@@ -16,7 +16,8 @@ import { UniversalTransition } from 'echarts/features';
 import { CanvasRenderer } from 'echarts/renderers';
 
 
-import { DrawPolyline } from '@/utils/vue-utils/draw/drawUtils';
+import { DrawPolyline, polylineOptions } from '@/utils/vue-utils/draw/drawUtils';
+import { CESIUM_3D_TILE, TERRAIN } from '@/constant/index';
 
 import { HeightReference, Viewer, Cartesian3, sampleTerrainMostDetailed, Cartographic, createWorldTerrain, EllipsoidGeodesic, Entity, VerticalOrigin, NearFarScalar, ConstantPositionProperty } from 'cesium';
 import CMath from 'cesium/Source/Core/Math';
@@ -42,10 +43,12 @@ class sectionAnalysis {
   echartOptions: any = {}
   echartIns: echarts.ECharts | undefined = undefined
   tipGraphic: Entity | undefined = undefined
+  drawType = TERRAIN
 
-  constructor(viewer: Viewer) {
+  constructor(viewer: Viewer, options?: polylineOptions) {
     this.viewer = viewer;
-    this.DrawPolylineIns = new DrawPolyline(viewer);
+    this.DrawPolylineIns = new DrawPolyline(viewer, options);
+    options && this.initOptions(options)
 
     this.echartOptions = {
       tooltip: {
@@ -146,6 +149,11 @@ class sectionAnalysis {
       ]
     };
   }
+  initOptions(options: polylineOptions) {
+    Object.keys(options).forEach(item => {
+      this[item] = options[item];
+    })
+  }
   /**
    * @description: 鼠标触发tooltip和地图的交互，在地图上增加marker
    * @param {*} point
@@ -164,7 +172,7 @@ class sectionAnalysis {
         billboard: {
           image: 'image/map-marker.png',
           scale: 0.2,
-          heightReference: HeightReference.CLAMP_TO_GROUND,
+          heightReference: this.drawType === TERRAIN ? HeightReference.CLAMP_TO_GROUND : HeightReference.NONE,
           verticalOrigin: VerticalOrigin.BOTTOM,
           scaleByDistance: new NearFarScalar(10000, 1.0, 500000, 0.2)
         }
@@ -217,37 +225,67 @@ class sectionAnalysis {
    */  
   getSampledData() {
     const sampledPositions = [Cartographic.fromCartesian(this.start)];
+    // 用于配置在3dtiles上采样
+    const sampledPositions_3dtiles = [this.start]
     const COUNT = 100;
     for (let i = 1; i < COUNT; i++) {
       const cart = Cartesian3.lerp(this.start, this.end, i / COUNT, new Cartesian3());
       sampledPositions.push(Cartographic.fromCartesian(cart));
+      sampledPositions_3dtiles.push(cart);
     }
 
     sampledPositions.push(Cartographic.fromCartesian(this.end));
+    sampledPositions_3dtiles.push(this.end);
 
-    const promise = sampleTerrainMostDetailed(createWorldTerrain(), sampledPositions);
-    promise.then(res => {
-      const dataGroup = res.map(item => {
-        const geodesic = new EllipsoidGeodesic();
-        geodesic.setEndPoints(Cartographic.fromCartesian(this.firstPoint), item);
-        const distance = geodesic.surfaceDistance;
-
-        return {
-          distance: distance,
-          height: item.height,
-          lng: CMath.toDegrees(item.longitude),
-          lat: CMath.toDegrees(item.latitude)
+    /* 这里要改，代码太臃肿了 */
+    if(this.drawType === CESIUM_3D_TILE) {
+      this.viewer.scene.clampToHeightMostDetailed(sampledPositions_3dtiles).then((res) => {
+        const dataGroup = res.map(_item => {
+          const item = Cartographic.fromCartesian(_item)
+          const geodesic = new EllipsoidGeodesic();
+          geodesic.setEndPoints(Cartographic.fromCartesian(this.firstPoint), item);
+          const distance = geodesic.surfaceDistance;
+  
+          return {
+            distance: distance,
+            height: item.height,
+            lng: CMath.toDegrees(item.longitude),
+            lat: CMath.toDegrees(item.latitude)
+          }
+        })
+  
+        this.echartDataGroup = this.echartDataGroup.concat(dataGroup)
+  
+        // 异步获取和更新数据
+        if (this.echartOptions.dataset) {
+          this.echartOptions.dataset.source = this.echartDataGroup
         }
+        this.echartIns && this.echartIns.setOption(this.echartOptions)
       })
-
-      this.echartDataGroup = this.echartDataGroup.concat(dataGroup)
-
-      // 异步获取和更新数据
-      if (this.echartOptions.dataset) {
-        this.echartOptions.dataset.source = this.echartDataGroup
-      }
-      this.echartIns && this.echartIns.setOption(this.echartOptions)
-    })
+    } else {
+      sampleTerrainMostDetailed(createWorldTerrain(), sampledPositions).then((res) => {
+        const dataGroup = res.map(item => {
+          const geodesic = new EllipsoidGeodesic();
+          geodesic.setEndPoints(Cartographic.fromCartesian(this.firstPoint), item);
+          const distance = geodesic.surfaceDistance;
+  
+          return {
+            distance: distance,
+            height: item.height,
+            lng: CMath.toDegrees(item.longitude),
+            lat: CMath.toDegrees(item.latitude)
+          }
+        })
+  
+        this.echartDataGroup = this.echartDataGroup.concat(dataGroup)
+  
+        // 异步获取和更新数据
+        if (this.echartOptions.dataset) {
+          this.echartOptions.dataset.source = this.echartDataGroup
+        }
+        this.echartIns && this.echartIns.setOption(this.echartOptions)
+      })
+    }
 
   }
   /**

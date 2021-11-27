@@ -1,52 +1,49 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-13 09:54:41
+ * @LastEditTime: 2021-11-27 10:34:39
  * @FilePath: \cesium-web-vue\src\views\index.vue
 -->
 <template>
   <div class="index" id="mapContainer">
     <HViewer @ready="onViewerReady"></HViewer>
-    <ToolbarGroup  v-if="isMapReady" class="toolbar-group"></ToolbarGroup>
+    <ToolbarGroup  v-if="isMapReady" class="toolbar-group" @onEdit3Dtiles="onEdit3Dtiles"></ToolbarGroup>
+    <Control3DTiles v-if="selectedTileset" :selectedTileset="selectedTileset"></Control3DTiles>
     <MapInfo v-if="isMapReady"></MapInfo>
     
     <!-- <div class="btn" @click="drawPolyline">绘制线</div>
     <div class="btn2" @click="drawPolygon">绘制面</div>
     <div class="btn3" @click="clearPolygon">清除绘制</div> -->
-
-    <!-- <div class="controlsGroup">
-      <el-button @click="startDig">点击绘制挖掘面</el-button>
-      <span style="color:red;font-weight: bold;">视角漫游</span><el-switch v-model="isKeyboardModel" @change="onChangeCameraModel" />
-    </div> -->
   </div>
 </template>
 
 <script lang="ts">
-import { onMounted, ref, provide, reactive, markRaw } from 'vue';
+import { onMounted, ref, Ref, provide, reactive, markRaw, defineComponent } from 'vue';
 
-import { DrawPolygon } from "@/utils/vue-utils/draw/drawUtils";
 import transform from "@/utils/vue-utils/transform/transform";
-import limitClip from '@/utils/vue-utils/limitGlobe/index';
-import TerrainClipPlan from '@/utils/js-utils/terrainClip/TerrainClipPlan';
 import HViewer from '@/components/viewer/hViewer.vue'
 import MapInfo from '@/components/mapInfo/mapInfo.vue'
+import Control3DTiles from '@/components/ToolInfoControl/control3DTiles.vue';
 
 import ToolbarGroup from '@/components/toolbarGroup/toolbarGroup.vue';
 import * as Cesium from 'cesium';
+import Cesium3DTilesInspector from 'cesium/Source/Widgets/Cesium3DTilesInspector/Cesium3DTilesInspector';
 const isKeyboardModel = ref(false)
 
-let viewer:Cesium.Viewer;
+let tmp_viewer:Cesium.Viewer;
 const _viewer: { viewer: Cesium.Viewer|null } = reactive({ viewer: null });
 // 判断Viewer组件是否准备完毕
 const isMapReady = ref(false);
 
 const onViewerReady = (viewer: Cesium.Viewer) => {
-  
+  tmp_viewer = viewer;
   // 修改ready状态并绑定provide值
   isMapReady.value = true;
   _viewer.viewer = markRaw(viewer);
 
   viewer.scene.globe.depthTestAgainstTerrain = true;
+  // viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
+  // viewer.scene.globe.show = false;
   viewer.terrainProvider = Cesium.createWorldTerrain()
   const baseLayer = viewer.scene.globe.imageryLayers.get(0);
   viewer.imageryLayers.remove(baseLayer);
@@ -91,7 +88,10 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
   // new limitClip(viewer);
   
   const tileset = new Cesium.Cesium3DTileset({
-    url: "3DTiles/hzhnhgeo/tileset.json"
+    url: "3DTiles/model3dtiles/tileset.json",
+    // cullWithChildrenBounds: false,
+    // cullRequestsWhileMoving: false,
+    // maximumScreenSpaceError: 1
   });
   viewer.scene.primitives.add(tileset);
   
@@ -104,22 +104,90 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
     let boundingSphereCenter = tileset.boundingSphere.center.clone()
     let modelMatrix = tileset.modelMatrix.clone()
     let trans = new transform(boundingSphereCenter, modelMatrix);
-    const tmpMatrix = new Cesium.Matrix4();
-    Cesium.Matrix4.multiply(
-      trans.translation(109.45966, 31.02833, 1000),
-      trans.rotation(-9, -6, 79),
-      tmpMatrix
+    const cartographic = Cesium.Cartographic.fromCartesian(
+      tileset.boundingSphere.center
     );
+    const surface = Cesium.Cartesian3.fromRadians(
+      cartographic.longitude,
+      cartographic.latitude,
+      0.0
+    );
+    const offset = Cesium.Cartesian3.fromRadians(
+      cartographic.longitude,
+      cartographic.latitude,
+      2000
+    );
+    const translation = Cesium.Cartesian3.subtract(
+      offset,
+      surface,
+      new Cesium.Cartesian3()
+    );
+    tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+    // const tmpMatrix = new Cesium.Matrix4();
+    // Cesium.Matrix4.multiply(
+    //   trans.translation(109.45966, 31.02833, 2000), // -5000 
+    //   trans.rotation(-9, -6, 79),
+    //   tmpMatrix
+    // );
     
-    tileset.modelMatrix = tmpMatrix;
+    // tileset.modelMatrix = tmpMatrix;
+
+    /* 拾取3dtiles开始 */ 
+    /*
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas)
+    handler.setInputAction(movement => {
+      const cartesian1 = viewer.scene.pickPosition(movement.position);
+      const cartographic = Cesium.Cartographic.fromCartesian(cartesian1);
+      
+      const startPoint = Cesium.Cartesian3.fromDegrees(
+        Cesium.Math.toDegrees(cartographic.longitude),
+        Cesium.Math.toDegrees(cartographic.latitude),
+        cartographic.height + 1000
+      );
+
+      const endPoint = Cesium.Cartesian3.fromDegrees(
+        Cesium.Math.toDegrees(cartographic.longitude),
+        Cesium.Math.toDegrees(cartographic.latitude),
+        -9999
+      );
+
+      const greenRhumbLine = viewer.entities.add({
+        name: "Green rhumb line",
+        polyline: {
+          positions: [
+            startPoint, 
+            endPoint, 
+          ],
+          width: 1,
+          material: Cesium.Color.GREEN,
+        },
+      });
+
+      const direction = Cesium.Cartesian3.normalize(
+        Cesium.Cartesian3.subtract(
+          endPoint,
+          startPoint,
+          new Cesium.Cartesian3()
+        ),
+        new Cesium.Cartesian3()
+      );
+      const ray1 = new Cesium.Ray(startPoint, direction);
+      const scene:any = viewer.scene;
+      const result = scene.drillPickFromRay(ray1); // 计算交互点，返回第一个
+      console.log(result);
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    */
+    
+    /* 拾取3dtiles结束 */ 
     
     viewer.zoomTo(tileset);
   })
+ 
   
   const tileset2 = new Cesium.Cesium3DTileset({
     url: Cesium.IonResource.fromAssetId(354759)
   })
-  // viewer.scene.primitives.add(tileset2);
+  viewer.scene.primitives.add(tileset2);
   
   tileset2.readyPromise.then(tileset => {
     let boundingSphereCenter = tileset.boundingSphere.center.clone()
@@ -127,57 +195,64 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
     let trans = new transform(boundingSphereCenter, modelMatrix);
     const tmpMatrix = new Cesium.Matrix4();
     Cesium.Matrix4.multiply(
-      trans.translation(109.46266, 31.02533, -40),
+      trans.translation(109.46266, 31.02533, 200), // -40
       trans.rotation(-107, 0, 128),
       tmpMatrix
     );
     
     tileset.modelMatrix = tmpMatrix;
+    // viewer.zoomTo(tileset);
+  })
+
+  const tileset3 = new Cesium.Cesium3DTileset({
+    url: "3DTiles/drill_3dtiles/tileset.json",
+  })
+  // viewer.scene.primitives.add(tileset3);
+  
+  tileset3.readyPromise.then(tileset => {
+    let boundingSphereCenter = tileset.boundingSphere.center.clone()
+    let modelMatrix = tileset.modelMatrix.clone()
+    let trans = new transform(boundingSphereCenter, modelMatrix);
+    const tmpMatrix = new Cesium.Matrix4();
+    Cesium.Matrix4.multiply(
+      trans.translation(113.805972, 27.664014, -1800), // -1800
+      trans.rotation(1, 0, 0),
+      tmpMatrix
+    );
     
+    tileset.modelMatrix = tmpMatrix;
+    
+    // viewer.zoomTo(tileset);
   })
 };
 
-export default {
+export default defineComponent({
   // setup返回值应该怎么定义类型
-  setup() {
+  setup(props, context) {
     provide('_viewer', _viewer);
  
-    let lastTerrainClip:TerrainClipPlan;
-    
-    /**  大改，绘制逻辑变了 */
-    const startDig = () => {
-      // 每次挖地之前清除上一次的贴图和plane
-      if (lastTerrainClip) {
-        lastTerrainClip.destroy();
-      }
-
-      let drawed = new DrawPolygon(viewer);
-
-      drawed.startCreate((DPosition: any) => {
-        lastTerrainClip = new TerrainClipPlan(viewer, {
-          points: drawed.positions,
-          bottomMaterial: "image/excavate_bottom_min.jpg",
-          wallMaterial: "image/excavate_bottom_min.jpg",
-          height: 100,
-          lerpInterval: 50
-        })
-      });
+    /** selectedTileset赋值开始 */
+    let selectedTileset: Ref<Cesium.Cesium3DTileset | undefined> = ref(undefined);
+    const onEdit3Dtiles = tileset => {
+      selectedTileset.value = tileset;
     }
-    /**  大改，绘制逻辑变了 */
+    /** selectedTileset赋值结束 */
 
     return {
-      startDig,
       isKeyboardModel,
       isMapReady,
-      onViewerReady
+      onViewerReady,
+      onEdit3Dtiles,
+      selectedTileset
     }
   },
   components: {
     ToolbarGroup,
+    Control3DTiles,
     HViewer,
     MapInfo
   }
-};
+});
 
 </script>
 <style lang="scss">

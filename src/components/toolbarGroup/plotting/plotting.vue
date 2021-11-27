@@ -30,7 +30,7 @@
   const plottingTools = ref([
     { name: PLOT_POINTER, icon:"icon-Pointer" },
     { name: PLOT_POLYLINE, icon:"icon-polyline" },
-    { name: PLOT_POLYGON, icon:"icon-tool_polygon" }
+    { name: PLOT_POLYGON, icon:"icon-xuanmianmianji" }
   ]);
   
   const modelPlottingTools = ref({

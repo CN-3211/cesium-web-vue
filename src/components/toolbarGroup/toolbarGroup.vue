@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-10-20 19:33:49
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-06 15:22:03
+ * @LastEditTime: 2021-11-27 09:45:10
  * @FilePath: \cesium-web-vue\src\components\toolbarGroup\toolbarGroup.vue
 -->
 <template>
@@ -25,7 +25,7 @@
         <span class="dialog-header-title">{{ activeItem.headerTxt }}</span>
         <span class="dialog-header-close" @click="closeDialog">x</span>
       </div>
-      <component :is="activeItem.cmp"></component>
+      <component :is="activeItem.cmp" @onEdit3Dtiles="onEdit3Dtiles"></component>
     </div>
   </div>
 </template>
@@ -37,6 +37,7 @@ import Analysis from './analysis/analysis.vue';
 import Others from "./others/others.vue"
 
 const tools = ref([
+  { text: "场景", headerTxt: "场景元素", icon: "icon-celiang", cmp: markRaw(Plotting), active: false },
   { text: "测量", headerTxt: "测量工具", icon: "icon-celiang", cmp: markRaw(Plotting), active: false },
   { text: "标绘", headerTxt: "标记工具", icon: "icon-biaohui", cmp: markRaw(Plotting), active: false },
   { text: "分析", headerTxt: "空间分析", icon: "icon-biaohui", cmp: markRaw(Analysis), active: true },
@@ -46,7 +47,7 @@ const isDialogShow = ref(true);
 let activeItem = ref(tools.value[2]);
 
 export default defineComponent({
-  setup() {
+  setup(props, context) {
     const onToolClick = item => {
       isDialogShow.value = true;
       tools.value.forEach(_item => (_item.active = false));
@@ -57,13 +58,18 @@ export default defineComponent({
       tools.value.forEach(_item => (_item.active = false));
       isDialogShow.value = false;
     }
+    const onEdit3Dtiles = tileset => {
+      context.emit('onEdit3Dtiles', tileset);
+      console.log('tileset :>> ', tileset);
+    }
 
     return {
       tools,
       onToolClick,
       isDialogShow,
       activeItem,
-      closeDialog
+      closeDialog,
+      onEdit3Dtiles
     };
   },
   components: {
@@ -86,6 +92,7 @@ export default defineComponent({
     left: 50px;
     background-color: #f5f5f5;
     padding: 50px 30px 0px 30px;
+    border-radius: 0 10px 10px 10px;
     .dialog-header {
       width: 100%;
       height: 50px;
