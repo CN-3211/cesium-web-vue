@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-15 17:02:29
- * @FilePath: \cesium-web-vue\.eslintrc.js
+ * @LastEditTime: 2021-12-01 08:59:10
+ * @FilePath: /cesium-web-vue/.eslintrc.js
  */
 
 module.exports = {
@@ -28,6 +28,7 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-this-alias": [
       "off",
       "error",

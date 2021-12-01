@@ -1,15 +1,15 @@
 /*
  * @Date: 2021-11-26 10:02:19
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-26 16:19:52
- * @FilePath: \cesium-web-vue\src\utils\vue-utils\handle3DTiles\selectTileset.ts
+ * @LastEditTime: 2021-12-01 08:56:45
+ * @FilePath: /cesium-web-vue/src/utils/vue-utils/handle3DTiles/selectTileset.ts
  */
 import { Color, Cesium3DTileStyle, Cesium3DTileset , Cesium3DTileFeature ,Viewer, ScreenSpaceEventHandler, ScreenSpaceEventType } from 'cesium';
 import { throttle } from '@/utils/index';
 
 export default function pick3Dtiles(viewer: Viewer, callback: (params: Cesium3DTileset) => void) {
   let tileset:Cesium3DTileset | undefined
-  let blinkInterval: NodeJS.Timeout
+  let blinkInterval
 
   const handler: ScreenSpaceEventHandler = new ScreenSpaceEventHandler(viewer.canvas);
   const blinkStyle = new Cesium3DTileStyle({

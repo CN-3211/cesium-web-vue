@@ -17,6 +17,7 @@ export default defineComponent({
   setup(props:ExtractPropTypes<typeof defaultViewerProps>, { emit }) {
     onMounted(() => {
       const { id, ...options } = reactive(props);
+      // @ts-ignore
       const viewer:Viewer = new Viewer(id, options);
       viewer.cesiumWidget.creditContainer.remove();
       emit("ready", viewer);

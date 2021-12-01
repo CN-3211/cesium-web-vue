@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+3DTiles
 /dist
 
 
@@ -23,6 +24,6 @@ pnpm-debug.log*
 *.sw?
 *.obj
 *.mtl
-3DTiles
+*.dae
 *.kml
 *.kmz

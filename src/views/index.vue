@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-27 10:34:39
- * @FilePath: \cesium-web-vue\src\views\index.vue
+ * @LastEditTime: 2021-12-01 09:00:36
+ * @FilePath: /cesium-web-vue/src/views/index.vue
 -->
 <template>
   <div class="index" id="mapContainer">
@@ -133,7 +133,6 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
     // tileset.modelMatrix = tmpMatrix;
 
     /* 拾取3dtiles开始 */ 
-    /*
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas)
     handler.setInputAction(movement => {
       const cartesian1 = viewer.scene.pickPosition(movement.position);
@@ -158,7 +157,7 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
             startPoint, 
             endPoint, 
           ],
-          width: 1,
+          width: 5,
           material: Cesium.Color.GREEN,
         },
       });
@@ -176,7 +175,6 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
       const result = scene.drillPickFromRay(ray1); // 计算交互点，返回第一个
       console.log(result);
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
-    */
     
     /* 拾取3dtiles结束 */ 
     
