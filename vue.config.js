@@ -1,11 +1,13 @@
 /*
  * @Date: 2021-06-03 09:53:17
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-15 20:03:13
- * @FilePath: \cesium-web-vue\vue.config.js
+ * @LastEditTime: 2021-12-30 14:35:38
+ * @FilePath: /cesium-web-vue/vue.config.js
  */
 const webpack = require('webpack')
+const path = require('path')
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const dvgisDist = './node_modules/@dvgis'
 
 module.exports = {
   publicPath: "./",
@@ -16,6 +18,7 @@ module.exports = {
       new CopyWebpackPlugin([{from: "node_modules/cesium/Build/Cesium/ThirdParty", to: "ThirdParty"}]),
       new CopyWebpackPlugin([{from: "node_modules/cesium/Build/Cesium/Assets", to: "Assets"}]),
       new CopyWebpackPlugin([{from: "node_modules/cesium/Build/Cesium/Widgets", to: "Widgets"}]),
+      new CopyWebpackPlugin([{from: path.join(dvgisDist, "dc-sdk/dist/resources"), to: path.join(__dirname, 'dist', 'libs/dc-sdk/resources')}]),
       new webpack.DefinePlugin({
         // Define relative base path in cesium for loading assets
         CESIUM_BASE_URL: JSON.stringify("./") // 相对路径build可用

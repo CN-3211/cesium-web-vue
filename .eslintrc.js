@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-01 08:59:10
+ * @LastEditTime: 2022-01-10 10:48:40
  * @FilePath: /cesium-web-vue/.eslintrc.js
  */
 
@@ -26,6 +26,7 @@ module.exports = {
     HTMLElement: true
   },
   rules: {
+    '@typescript-eslint/no-var-requires': 'off', // 允许在import中使用require
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     "@typescript-eslint/ban-ts-comment": "off",
