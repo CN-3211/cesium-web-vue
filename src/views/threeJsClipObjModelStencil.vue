@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-20 11:12:22
- * @FilePath: \cesium-web-vue\src\views\threeJsClipObjModelStencil.vue
+ * @LastEditTime: 2022-03-08 15:50:21
+ * @FilePath: /cesium-web-vue/src/views/threeJsClipObjModelStencil.vue
 -->
 <template>
   <div class="threeJsClipObjModelStencil" id="threeJsClipObjModelStencil">
@@ -87,22 +87,26 @@ export default defineComponent({
     
     onMounted(async () => {
       await init();
+      stencilClipIns.lookAtPlane();
       animate();
     });
     const onSlideX = () => {
       stencilClipIns.planes[0].forEach(item => {
         item.constant = distance.x;
       })
+      stencilClipIns.lookAtPlane();
     }
     const onSlideY = () => {
       stencilClipIns.planes[1].forEach(item => {
         item.constant = distance.y;
       })
+      stencilClipIns.lookAtPlane();
     }
     const onSlideZ = () => {
       stencilClipIns.planes[2].forEach(item => {
         item.constant = distance.z;
       })
+      stencilClipIns.lookAtPlane();
     }
 
     const onStretchingZ = () => {
@@ -210,7 +214,8 @@ async function init(): Promise<void> {
 
 function animate(): void {
   requestAnimationFrame(animate);
-  stencilClipIns.lookAtPlane();
+  // lookaAtPlane的作用在于调整填充面的位置，可以在动态切割时调用
+  // stencilClipIns.lookAtPlane();
   renderer.render(scene, camera);
 }
 </script>

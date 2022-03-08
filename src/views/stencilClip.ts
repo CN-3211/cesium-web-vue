@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-20 11:17:03
- * @FilePath: \cesium-web-vue\src\views\stencilClip.ts
+ * @LastEditTime: 2022-03-08 16:39:34
+ * @FilePath: /cesium-web-vue/src/views/stencilClip.ts
  */
 import * as THREE from 'three';
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
@@ -150,10 +150,10 @@ export default class stencilClip {
         });
         this.clipOptions.clipEachOther && (planeMat.clippingPlanes = result)
         const po = new THREE.Mesh(planeGeom, planeMat);
-        console.log('po', po);
         po.onAfterRender = (renderer) => {
           renderer.clearStencil();
         };
+        // 设置填充面渲染优先级，需要和模版缓冲区域的优先级保持一致
         po.renderOrder = i + 2.2;
         this.poGroup.add(po);
 
@@ -355,9 +355,18 @@ export default class stencilClip {
         for (let i = 0; i < this.objAndMtls.length; i++) {
           const plane = this.planes[x][i];
           const po = this.planeObjects[x][i];
-  
+          // 确定po所在的坐标，即plane.position（plane坐标）* -constant（plane距离原点的位置）
           plane.coplanarPoint(po.position);
           // mesh.lookAt起什么作用
+          if(x == 1 && i == 2) {
+            console.log('po.position :>> ', po.position);
+            console.log('plane.normal :>> ', plane.normal);
+          }
+          /* 本来lookAt用于camera，传入的(x, y, z)就代表camera所朝向的物体坐标
+           * 在这里lookAt用于po上，此时(x,y,z)，代表po应该朝向的点。
+           * webGL中的lookAt函数三个变量分别是：eye，target，up，需要与threeJS封装后的lookAt区分
+           * threeJS封装后的lookAt只需要关注物体（camera）朝向的坐标，无需关心up
+          */
           po.lookAt(
             po.position.x - plane.normal.x,
             po.position.y - plane.normal.y,
