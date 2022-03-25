@@ -1,50 +1,35 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-03-08 16:39:34
+ * @LastEditTime: 2022-03-25 14:47:26
  * @FilePath: /cesium-web-vue/src/views/stencilClip.ts
  */
 import * as THREE from 'three';
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { routerClip, threeFaceClip } from './stencilClipType';
 
-import { Ref } from 'vue';
-interface threeFaceClip {
-  onlyShowPlanes: boolean
-  negateX?: boolean
-  negateY?: boolean
-  negateZ?: boolean
-}
-interface routerClip {
-  isSelecting: Ref<boolean>
-}
-
-interface clipOptions {
-  routerClip?: routerClip
-  threeFaceClip?: threeFaceClip
-  clipEachOther?: boolean
-}
-
+let _dbEvent
 export default class stencilClip {
-  objAndMtls: any[]
+  objAndMtls: any[] = []
   stencilGroup = new THREE.Group();
   modelGroup = new THREE.Group;
   poGroup = new THREE.Group();
   lineGroup = new THREE.Group();
   _scene: THREE.Scene
-  clipOptions: clipOptions
+  _camera: THREE.PerspectiveCamera
+  clipOptions: routerClip | threeFaceClip
   planes: THREE.Plane[][] = [];
   planeObjects: THREE.Mesh[][] = [];
-  selectPoints: THREE.Vector3[] = [];
-  testCenter: THREE.Vector3 = new THREE.Vector3();
-  testNumber = 1;
-  constructor(scene: THREE.Scene, clipOptions: clipOptions) {
+  planCenterMap: THREE.Vector3[] = []
+  planLengthMap: number[] = []
+  selectPolyline: THREE.Vector3[] = [];
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera, clipOptions: routerClip | threeFaceClip) {
     this._scene = scene;
-    this.objAndMtls = [];
+    this._camera = camera;
     this.clipOptions = clipOptions
     
     // 初始化用于切割的planes和用于可视化的planeObjects
-    
     this._scene.add(this.stencilGroup);
     this._scene.add(this.modelGroup);
     this._scene.add(this.poGroup);
@@ -52,16 +37,18 @@ export default class stencilClip {
   }
   initPlanes(): void {
     // 如果为自定义切割模式，则默认返回空二维数组
-    if(this.clipOptions.routerClip) {
+    if('isSelecting' in this.clipOptions) {
       return
     }
     const planes: THREE.Plane[][] = [[], [], []];
     let plane0 = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
     let plane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
     let plane2 = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
-    plane0 = this.clipOptions.threeFaceClip?.negateX ? plane0.negate() : plane0
-    plane1 = this.clipOptions.threeFaceClip?.negateY ? plane1.negate() : plane1
-    plane2 = this.clipOptions.threeFaceClip?.negateZ ? plane2.negate() : plane2
+    if(!('isSelecting' in this.clipOptions)) {
+      plane0 = this.clipOptions.negateX ? plane0.negate() : plane0
+      plane1 = this.clipOptions.negateY ? plane1.negate() : plane1
+      plane2 = this.clipOptions.negateZ ? plane2.negate() : plane2
+    }
     for (let i = 0; i < this.objAndMtls.length; i++) {
       planes[0].push(plane0);
       planes[1].push(plane1);
@@ -89,7 +76,7 @@ export default class stencilClip {
     }
     this.initPlanes();
     // 当切割模式为三面裁剪时，在加载模型后立即开始切割模型
-    if(this.clipOptions.threeFaceClip) {
+    if(!('isSelecting' in this.clipOptions)) {
       this.clipModel();
     }
   }
@@ -110,11 +97,14 @@ export default class stencilClip {
             child.renderOrder = 6; // ??
           }
         });
-        if(this.clipOptions.threeFaceClip) { 
-          this.clipOptions.threeFaceClip?.onlyShowPlanes && this._scene.remove(this.modelGroup)
+
+        let planeGeom = new THREE.PlaneGeometry(1000, 1000);
+        if(!('isSelecting' in this.clipOptions)) { 
+          this.clipOptions.onlyShowPlanes && this._scene.remove(this.modelGroup)
+        } else {
+          // planeGeom.parameters.height = this.planLengthMap[x]
+          planeGeom = new THREE.PlaneGeometry(1000, this.planLengthMap[x]);
         }
-        // const planeGeom = new THREE.PlaneGeometry(10000, this.testNumber);
-        const planeGeom = new THREE.PlaneGeometry(10000, 10000);
 
         const plane = this.planes[x][i];
         layerModel.children.forEach((itemModel) => {
@@ -148,7 +138,12 @@ export default class stencilClip {
           stencilFunc: THREE.NotEqualStencilFunc,
           // clipIntersection: true,
         });
-        this.clipOptions.clipEachOther && (planeMat.clippingPlanes = result)
+
+        // 若为threeFaceClip，且clipEachOther为true，此时让各个切平面互相裁剪
+        if(!('isSelecting' in this.clipOptions) && this.clipOptions.clipEachOther) {
+          planeMat.clippingPlanes = result
+        }
+
         const po = new THREE.Mesh(planeGeom, planeMat);
         po.onAfterRender = (renderer) => {
           renderer.clearStencil();
@@ -156,20 +151,11 @@ export default class stencilClip {
         // 设置填充面渲染优先级，需要和模版缓冲区域的优先级保持一致
         po.renderOrder = i + 2.2;
         this.poGroup.add(po);
-
         this.planeObjects[x].push(po);
       }
     }
     const tmp = new THREE.Vector3();
     this.poGroup.getWorldPosition(tmp)
-    console.log('this.poGroup.getWorldPosition', tmp);
-    console.log('this.poGroup.normal', this.poGroup.up);
-    setTimeout(() => {
-      // this.poGroup.position.setX(this.testCenter.x);
-      // this.poGroup.position.setY(this.testCenter.y);
-    }, 2000)
-    console.log('this.poGroup.position2', this.poGroup.position);
-    console.log('this.poGroup', this.poGroup);
   }
   /**
    * @description: 在切割后的模型所在位置创建模板缓冲区
@@ -216,131 +202,66 @@ export default class stencilClip {
 
     return group;
   }
-  selectRouter2(container: HTMLElement, camera: THREE.PerspectiveCamera) {
-    const selectPolyline: THREE.Vector3[] = [new THREE.Vector3(0.5, 2, 0), new THREE.Vector3(1.2, 2, 0)];
-    console.log('object :>> ', selectPolyline);
-    this.testCenter.x = (selectPolyline[0].x + selectPolyline[1].x)/2;
-    this.testCenter.y = (selectPolyline[0].y + selectPolyline[1].y)/2;
-    this.testNumber = selectPolyline[1].clone().sub(selectPolyline[0]).length();
-    const test = new THREE.Vector3(selectPolyline[1].x, selectPolyline[1].y, selectPolyline[1].z - 1)
-    const normalize = selectPolyline[1].clone().sub(selectPolyline[0]).cross(test.sub(selectPolyline[0])).normalize();
-    const distance = (-selectPolyline[0].dot(normalize)) / (Math.sqrt(normalize.x * normalize.x + normalize.y * normalize.y + normalize.z * normalize.z));
-    console.log('distance', distance);
-    const planex = new THREE.Plane(new THREE.Vector3(normalize.x, normalize.y, normalize.z), distance);
-    this.planes.push([]);
-    this.planeObjects.push([]);
-    for (let i = 0; i < this.objAndMtls.length; i++) {
-      this.planes[this.planes.length - 1].push(planex);
-    }
-
-    const material = new THREE.LineBasicMaterial({
-      color: 0x0000ff,
-      
-    });
-    const geometry = new THREE.BufferGeometry().setFromPoints( selectPolyline );
-    const line = new THREE.Line( geometry, material );
-    this.lineGroup.add( line );
-  }
-  createBoxStencil(selectPolyline: THREE.Vector3[]) {
-
-    const geometry = new THREE.BoxGeometry( this.testNumber, this.testNumber, this.testNumber );
-    const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-    material.colorWrite = false;
-    material.depthWrite = false;
-    material.depthTest = false;
-    material.colorWrite = false;
-    material.stencilWrite = true;
-    material.stencilFunc = THREE.AlwaysStencilFunc;
-    const mat0 = material.clone();
-    mat0.side = THREE.BackSide;
-    // IncrementWrapStencilOp将当前stencil value增加1
-    mat0.stencilZPass = THREE.IncrementWrapStencilOp;
-
-    const mat1 = material.clone();
-    mat1.side = THREE.FrontSide;
-    mat1.stencilZPass = THREE.DecrementWrapStencilOp;
-
-    const cube = new THREE.Mesh( geometry, material );
-    cube.position.set(this.testCenter.x, this.testCenter.y, this.testCenter.z);
-    cube.lookAt(new THREE.Vector3(0, 0, 0))
-    this._scene.add( cube );
-    console.log('',111);
-  }
-
-  selectRouter(container: HTMLElement, camera: THREE.PerspectiveCamera) {
+  /**
+   * @description: 选择路径时，鼠标双击事件。用于removeEventListener
+   * @param {HTMLElement} container
+   * @param {*} e 鼠标参数
+   * @return {*}
+   */  
+  dbEvent(container: HTMLElement, e: any): void {
     const mouse = new THREE.Vector2();
-    const selectPolyline: THREE.Vector3[] = [];
-    const dbEvent = e => {
-      mouse.x = ((e.clientX - container.getBoundingClientRect().left) / container.offsetWidth) * 2 - 1;
-      mouse.y = -((e.clientY - container  .getBoundingClientRect().top) / container .offsetHeight) * 2 + 1;
-      const vector = new THREE.Vector3(mouse.x, mouse.y, 1).unproject(camera);
-      const raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
-      const intersects = raycaster.intersectObjects(this.modelGroup.children[0].children, true);
-      if (intersects.length > 0) {
-          const point = intersects[0].point; //射线在模型表面拾取的点坐标
-        console.log('intersects', intersects);
-          selectPolyline.push(point);
+    mouse.x = ((e.clientX - container.getBoundingClientRect().left) / container.offsetWidth) * 2 - 1;
+    mouse.y = -((e.clientY - container.getBoundingClientRect().top) / container .offsetHeight) * 2 + 1;
+    const vector = new THREE.Vector3(mouse.x, mouse.y, 1).unproject(this._camera);
+    const raycaster = new THREE.Raycaster(this._camera.position, vector.sub(this._camera.position).normalize());
+    const intersects = raycaster.intersectObjects(this.modelGroup.children[0].children, true);
+    if (intersects.length > 0) {
+        const point = intersects[0].point; //射线在模型表面拾取的点坐标
+        this.selectPolyline.push(point);
+    }
+  
+    if(this.selectPolyline.length === 2) {
+      // 中点xy坐标
+      const polyCenter = new THREE.Vector3();
+      polyCenter.x = (this.selectPolyline[0].x + this.selectPolyline[1].x)/2;
+      polyCenter.y = (this.selectPolyline[0].y + this.selectPolyline[1].y)/2;
+      this.planCenterMap.push(polyCenter.clone())
+      // 两点连线的距离
+      const polyLen = new THREE.Vector3(this.selectPolyline[0].x - this.selectPolyline[1].x, this.selectPolyline[0].y - this.selectPolyline[1].y, 0).length();
+      this.planLengthMap.push(polyLen)
+      // 第二个点沿Z垂直向负方向的1单位的点
+      const test = new THREE.Vector3(this.selectPolyline[1].x, this.selectPolyline[1].y, this.selectPolyline[1].z - 1)
+      
+      // 构成切面的法向量和原点距离
+      const normalize = this.selectPolyline[1].clone().sub(this.selectPolyline[0]).cross(test.sub(this.selectPolyline[0])).normalize().negate();
+      const distance = (-this.selectPolyline[0].dot(normalize)) / (Math.sqrt(normalize.x * normalize.x + normalize.y * normalize.y + normalize.z * normalize.z));
+  
+      const planex = new THREE.Plane(new THREE.Vector3(normalize.x, normalize.y, normalize.z), distance);
+      this.planes.push([]);
+      this.planeObjects.push([]);
+      for (let i = 0; i < this.objAndMtls.length; i++) {
+        this.planes[this.planes.length - 1].push(planex);
       }
   
-      if(selectPolyline.length === 2) {
-        console.log('selectPolyline :>> ', selectPolyline);
-        this.testCenter.x = (selectPolyline[0].x + selectPolyline[1].x)/2;
-        this.testCenter.y = (selectPolyline[0].y + selectPolyline[1].y)/2;
-        this.testNumber = selectPolyline[1].clone().sub(selectPolyline[0]).length();
-        const test = new THREE.Vector3(selectPolyline[1].x, selectPolyline[1].y, selectPolyline[1].z - 1)
-        console.log('sub :>> ', selectPolyline[1].clone().sub(selectPolyline[0]));
-        const normalize = selectPolyline[1].clone().sub(selectPolyline[0]).cross(test.sub(selectPolyline[0])).normalize().negate();
-        console.log('normalize :>> ', normalize);
-        const distance = (-selectPolyline[0].dot(normalize)) / (Math.sqrt(normalize.x * normalize.x + normalize.y * normalize.y + normalize.z * normalize.z));
-        console.log('distance', distance);
-        const planex = new THREE.Plane(new THREE.Vector3(normalize.x, normalize.y, normalize.z), distance);
-        this.planes.push([]);
-        this.planeObjects.push([]);
-        for (let i = 0; i < this.objAndMtls.length; i++) {
-          this.planes[this.planes.length - 1].push(planex);
-        }
+      const material = new THREE.LineBasicMaterial({
+        color: 0x0000ff
+      });
   
-        const material = new THREE.LineBasicMaterial({
-          color: 0x0000ff
-        });
-
-       
-
-        const geometry = new THREE.BufferGeometry().setFromPoints( selectPolyline );
-        const line = new THREE.Line( geometry, material );
-        this.lineGroup.add( line );
-        // this.createBoxStencil(selectPolyline)
-        selectPolyline.shift();
-      }
-    };
-    container.addEventListener('dblclick', dbEvent, false);
+      const geometry = new THREE.BufferGeometry().setFromPoints( this.selectPolyline );
+      const line = new THREE.Line( geometry, material );
+      this.lineGroup.add( line );
+      this.selectPolyline.shift();
+    }
   }
-  endSelectRouter() {
+  selectRouter(container: HTMLElement) {
+    _dbEvent = this.dbEvent.bind(this, container);
+    container.addEventListener('dblclick', _dbEvent, false);
+  }
+  endSelectRouter(container: HTMLElement) {
     this._scene.remove(this.lineGroup);
     this.clipModel();
     this._scene.remove(this.modelGroup);
-    // setTimeout(() => {
-    //   this.stencilGroup.visible = false;
-    //   this.modelGroup.children.forEach(layerModel => {
-    //     layerModel.traverse((child: THREE.Object3D) => {
-    //       if (child instanceof THREE.Mesh) {
-    //         child.material.clippingPlanes = '';
-    //         child.castShadow = true; // ??
-    //         child.renderOrder = 6; // ??
-    //       }
-    //     });
-    //   })
-    // }, 5000)
-  }
-  changeClippingPlaneShowModel(mutualed: boolean) {
-    
-    this.poGroup.children.forEach(item => {
-      const _item = item as any;
-      if(!_item.material) {
-        throw new Error("material不存在");
-      }
-      _item.material.clippingPlanes = null;
-    })
+    container.removeEventListener('dblclick', _dbEvent)
   }
   onlyShowPlanes(isShowPlanes) {
     if(isShowPlanes) {
@@ -356,12 +277,17 @@ export default class stencilClip {
           const plane = this.planes[x][i];
           const po = this.planeObjects[x][i];
           // 确定po所在的坐标，即plane.position（plane坐标）* -constant（plane距离原点的位置）
-          plane.coplanarPoint(po.position);
-          // mesh.lookAt起什么作用
-          if(x == 1 && i == 2) {
-            console.log('po.position :>> ', po.position);
-            console.log('plane.normal :>> ', plane.normal);
+          if('isSelecting' in this.clipOptions) {
+            // 调整每一个路径对应的填充plan坐标
+            po.position.copy(this.planCenterMap[x])
+          } else {
+            plane.coplanarPoint(po.position);
           }
+          // // mesh.lookAt起什么作用
+          // if(x == 1 && i == 2) {
+          //   console.log('po.position :>> ', po.position);
+          //   console.log('plane.normal :>> ', plane.normal);
+          // }
           /* 本来lookAt用于camera，传入的(x, y, z)就代表camera所朝向的物体坐标
            * 在这里lookAt用于po上，此时(x,y,z)，代表po应该朝向的点。
            * webGL中的lookAt函数三个变量分别是：eye，target，up，需要与threeJS封装后的lookAt区分
@@ -377,13 +303,24 @@ export default class stencilClip {
     }
 
     // 只有在clipOptions中传入了routerClip/threeFaceClip参数后，才允许调整plane的lookAt
-    if(this.clipOptions.routerClip) {
+    if('isSelecting' in this.clipOptions) {
       // 若为routerClip，需要在选取路径结束后调用_lookAtPlane
-      if(!this.clipOptions.routerClip.isSelecting.value) {
+      if(!this.clipOptions.isSelecting.value) {
         _lookAtPlane()
       }
-    } else if(this.clipOptions.threeFaceClip) {
+    } else {
       _lookAtPlane()
     }
+  }
+  /**
+   * @description: 在三面裁剪和自定义切割之间切换时，重置模型
+   * @param {*}
+   * @return {*}
+   */  
+  resetModel() {
+    this._scene.remove(this.stencilGroup);
+    this._scene.remove(this.modelGroup);
+    this._scene.remove(this.poGroup);
+    this._scene.remove(this.lineGroup);
   }
 }

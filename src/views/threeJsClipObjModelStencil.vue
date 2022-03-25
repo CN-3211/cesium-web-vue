@@ -1,23 +1,25 @@
 <!--
  * @Date: 2021-06-30 19:52:31
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-03-08 15:50:21
+ * @LastEditTime: 2022-03-25 14:57:23
  * @FilePath: /cesium-web-vue/src/views/threeJsClipObjModelStencil.vue
 -->
 <template>
   <div class="threeJsClipObjModelStencil" id="threeJsClipObjModelStencil">
     <div class="controlGroup">
-      <el-tabs type="border-card">
-        <el-tab-pane v-for="tab in tabs" :key="tab" :label="tab">
+      <el-tabs type="border-card" v-model="tabsName">
+        <el-tab-pane v-for="tab in tabs" :key="tab" :label="tab" :name="tab">
           <el-switch v-show="tab === '三面裁剪'" v-model="isShowPlanes" active-text="显示切面" inactive-text="显示模型"></el-switch>
           <el-switch v-show="tab === '自定义切割'" v-model="isSelecting" active-text="开始选择" inactive-text="停止选择"></el-switch>
-          <div>
+          <div v-show="tab === '三面裁剪'">
             <span class="demonstration">X平面距离</span>
             <el-slider v-model="distance.x" :min="-5" :max="5" :step="0.001" @input="onSlideX"></el-slider>
             <span class="demonstration">Y平面距离</span>
             <el-slider v-model="distance.y" :min="-5" :max="5" :step="0.001" @input="onSlideY"></el-slider>
             <span class="demonstration">Z平面距离</span>
             <el-slider v-model="distance.z" :min="-3" :max="3" :step="0.001" @input="onSlideZ"></el-slider>
+          </div>
+          <div>
             <span class="demonstration">Z轴拉伸</span>
             <el-slider v-model="zStretching" :min="1" :max="20" :step="1" @input="onStretchingZ"></el-slider>
           </div>
@@ -26,13 +28,15 @@
     </div>
   </div>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
 // #region
-import { defineComponent, onMounted, reactive, ref, watch } from "vue";
-
+import { onMounted, reactive, ref, watch } from "vue";
+ 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import stencilClip from '@/views/stencilClip';
+import { routerClip, threeFaceClip } from './stencilClipType';
+
 const distance = reactive({
   x: 0,
   y: 0,
@@ -70,56 +74,74 @@ const modelNameArr = [ '①',
   '⑩',
   '⑾' ];
 
-
 let stencilClipIns: stencilClip; 
 const isSelecting = ref(false)
 const isShowPlanes = ref(false)
-const isClipMutual = ref(false);
 
-export default defineComponent({
-  setup() {
-    const tabs = ref(["三面裁剪", "自定义切割"]);
-    const negated = reactive({
-      x: false,
-      y: false,
-      z: false
-    })
-    
-    onMounted(async () => {
-      await init();
-      stencilClipIns.lookAtPlane();
-      animate();
-    });
-    const onSlideX = () => {
-      stencilClipIns.planes[0].forEach(item => {
-        item.constant = distance.x;
-      })
-      stencilClipIns.lookAtPlane();
-    }
-    const onSlideY = () => {
-      stencilClipIns.planes[1].forEach(item => {
-        item.constant = distance.y;
-      })
-      stencilClipIns.lookAtPlane();
-    }
-    const onSlideZ = () => {
-      stencilClipIns.planes[2].forEach(item => {
-        item.constant = distance.z;
-      })
-      stencilClipIns.lookAtPlane();
-    }
+const tabs = ref(["三面裁剪", "自定义切割"]);
+const tabsName = ref('自定义切割')
 
-    const onStretchingZ = () => {
-      if(stencilClipIns) {
-        stencilClipIns.modelGroup.scale.set(1, 1, zStretching.value);
-        stencilClipIns.stencilGroup.scale.set(1, 1, zStretching.value);
-      }
+const TFClip = {
+  onlyShowPlanes: isShowPlanes.value,
+  negateX: false,
+  negateY: false,
+  negateZ: false,
+  clipEachOther: true
+}
+
+const RClip = {
+  isSelecting: isSelecting
+}
+
+onMounted(async () => {
+  const container = initScene();
+  initClip(container, RClip);
+  watch(tabsName, async val => {
+    stencilClipIns.resetModel()
+    if(val === '自定义切割') {
+      initClip(container, RClip)
+    } else {
+      initClip(container, TFClip)
     }
-    return { distance, onSlideX, onSlideY, onSlideZ, tabs, negated,  isClipMutual, isSelecting, isShowPlanes, zStretching, onStretchingZ }
-  },
+  })
+  /* 监听拾取点击坐标开始 */
+  watch(isSelecting, val => {
+    if(val) {
+      stencilClipIns.selectRouter(container)
+    } else {
+      stencilClipIns.endSelectRouter(container)
+    }
+  })
+  /* 监听拾取点击坐标结束 */
+  watch(isShowPlanes, val => {
+    stencilClipIns.onlyShowPlanes(val);
+  })
 });
 
-async function init(): Promise<void> {
+const onSlideX = () => {
+  stencilClipIns.planes[0].forEach(item => {
+    item.constant = distance.x;
+  })
+}
+const onSlideY = () => {
+  stencilClipIns.planes[1].forEach(item => {
+    item.constant = distance.y;
+  })
+}
+const onSlideZ = () => {
+  stencilClipIns.planes[2].forEach(item => {
+    item.constant = distance.z;
+  })
+}
+
+const onStretchingZ = () => {
+  if(stencilClipIns) {
+    stencilClipIns.modelGroup.scale.set(1, 1, zStretching.value);
+    stencilClipIns.stencilGroup.scale.set(1, 1, zStretching.value);
+  }
+}
+
+function initScene(): HTMLElement {
   const container: HTMLElement | null = document.getElementById(
     "threeJsClipObjModelStencil"
   );
@@ -146,23 +168,38 @@ async function init(): Promise<void> {
     1
   );
   camera.add(dirLight);
+  camera.lookAt(new THREE.Vector3(0, 10, 0))
   scene.add(camera);
 
   // 辅助调试
   const axisHelper = new THREE.AxesHelper(250);
   scene.add(axisHelper);
-  stencilClipIns = new stencilClip(scene, { 
-    // routerClip: {
-    //   isSelecting: isSelecting
-    // },
-    threeFaceClip: {
-      onlyShowPlanes: isShowPlanes.value,
-      negateX: false,
-      negateY: false,
-      negateZ: false
-    },
-    clipEachOther: true
-  });
+  
+  // render配置
+  renderer = new THREE.WebGLRenderer();
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setClearColor(0x263238);
+  renderer.localClippingEnabled = true;
+
+  container.appendChild(renderer.domElement);
+  renderer.render(scene, camera);
+
+  // 控制器添加
+  const controls: OrbitControls = new OrbitControls(
+    camera,
+    renderer.domElement
+  );
+  controls.minDistance = 1.5;
+
+  return container
+}
+// #endregion
+
+
+
+async function initClip(container: HTMLElement, clipOptions: routerClip | threeFaceClip) {
+  stencilClipIns = new stencilClip(scene, camera, clipOptions);
   await stencilClipIns.loadModels("obj/惠南湖分层模型/", modelNameArr);
   const box = new THREE.Box3();
   const groupCenter = new THREE.Vector3()
@@ -175,49 +212,17 @@ async function init(): Promise<void> {
   stencilClipIns.stencilGroup.translateX(-groupCenter.x);
   stencilClipIns.stencilGroup.translateY(-groupCenter.y);
   stencilClipIns.stencilGroup.translateZ(-groupCenter.z);
-
-
-  /* 监听拾取点击坐标开始 */
-  watch(isSelecting, val => {
-    if(val) {
-      stencilClipIns.selectRouter(container, camera)
-    } else {
-      stencilClipIns.endSelectRouter()
-    }
-  })
-  /* 监听拾取点击坐标结束 */
-
-  watch(isShowPlanes, val => {
-    stencilClipIns.onlyShowPlanes(val);
-  })
-  
-  // render配置
-  renderer = new THREE.WebGLRenderer();
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setClearColor(0x263238);
-  renderer.localClippingEnabled = true;
-
-  container.appendChild(renderer.domElement);
-  renderer.render(scene, camera);
-
-  
-
-  // 控制器添加
-  const controls: OrbitControls = new OrbitControls(
-    camera,
-    renderer.domElement
-  );
-  controls.minDistance = 1.5;
+  animate()
 }
-// #endregion
 
 function animate(): void {
   requestAnimationFrame(animate);
+  
   // lookaAtPlane的作用在于调整填充面的位置，可以在动态切割时调用
-  // stencilClipIns.lookAtPlane();
+  stencilClipIns.lookAtPlane();
   renderer.render(scene, camera);
 }
+
 </script>
 
 <style lang="scss">
