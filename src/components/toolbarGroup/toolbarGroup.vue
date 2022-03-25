@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-10-20 19:33:49
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-27 09:45:10
- * @FilePath: \cesium-web-vue\src\components\toolbarGroup\toolbarGroup.vue
+ * @LastEditTime: 2022-01-10 11:37:47
+ * @FilePath: /cesium-web-vue/src/components/toolbarGroup/toolbarGroup.vue
 -->
 <template>
   <div class="toolbar-group">
@@ -32,19 +32,20 @@
 
 <script lang="ts">
 import { ref, defineComponent, markRaw } from "vue";
+import Scenes from './Scenes/index.vue';
 import Plotting from "./plotting/plotting.vue"
 import Analysis from './analysis/analysis.vue';
 import Others from "./others/others.vue"
 
 const tools = ref([
-  { text: "场景", headerTxt: "场景元素", icon: "icon-celiang", cmp: markRaw(Plotting), active: false },
+  { text: "场景", headerTxt: "场景元素", icon: "icon-celiang", cmp: markRaw(Scenes), active: false },
   { text: "测量", headerTxt: "测量工具", icon: "icon-celiang", cmp: markRaw(Plotting), active: false },
   { text: "标绘", headerTxt: "标记工具", icon: "icon-biaohui", cmp: markRaw(Plotting), active: false },
   { text: "分析", headerTxt: "空间分析", icon: "icon-biaohui", cmp: markRaw(Analysis), active: true },
   { text: "其他", headerTxt: "其他工具", icon: "icon-qita", cmp: markRaw(Others), active: false }
 ]);
 const isDialogShow = ref(true);
-let activeItem = ref(tools.value[2]);
+let activeItem = ref(tools.value[3]);
 
 export default defineComponent({
   setup(props, context) {
@@ -73,11 +74,12 @@ export default defineComponent({
     };
   },
   components: {
+    Scenes,
     Plotting,
     Others,
     Analysis
   }
-});
+})
 </script>
 
 <style lang="scss" scoped>

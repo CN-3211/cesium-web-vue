@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-11-04 21:58:18
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-22 14:11:08
- * @FilePath: \cesium-web-vue\src\components\toolbarGroup\analysis\analysis.vue
+ * @LastEditTime: 2022-01-10 19:22:29
+ * @FilePath: /cesium-web-vue/src/components/toolbarGroup/analysis/analysis.vue
 -->
 <template>
   <div class="analysis" id="analysis">
@@ -19,111 +19,119 @@
   </div>
 </template>
 
-<script lang="ts">
-import * as Cesium from "cesium";
-import { inject, ref, watch } from "vue";
-import Tool from '../tool.vue'
-import { sectionAnalysis, } from './sectionAnalysis';
-import { digTerrainPlan } from '@/utils/vue-utils/digTerrain/index';
-import { CESIUM_3D_TILE, TERRAIN } from '@/constant/index';
+<script lang="ts" setup>
+  import * as Cesium from "cesium";
+  import { inject, ref, watch } from "vue";
+  import Tool from '../tool.vue'
+  import { sectionAnalysis, } from './sectionAnalysis';
+  import { digTerrainPlan } from './digAnalysis';
+  import virtualDrilling from './virtualDrilling';
+  import { CESIUM_3D_TILE, TERRAIN } from '@/constant/index';
 
-// 配置文件模块
-const SECTION_ANALYSIS = "剖面分析";
-const TERRAIN_CLIP = "挖方分析";
+  // 配置文件模块
+  const SECTION_ANALYSIS = "剖面分析";
+  const TERRAIN_CLIP = "挖方分析";
+  const VIRTUAL_DRilling = "虚拟钻孔";
 
-const otherTools = ref([
-  { name: SECTION_ANALYSIS, icon: "icon-poumianxinxi" },
-  { name: TERRAIN_CLIP, icon: "icon-wadong" },
-]);
+  const otherTools = ref([
+    { name: SECTION_ANALYSIS, icon: "icon-poumianxinxi" },
+    { name: TERRAIN_CLIP, icon: "icon-wadong" },
+    { name: VIRTUAL_DRilling, icon: "icon-wadong" },
+  ]);
 
-// 图标高亮模块
-let activedTool = ref('');
-const onToolActive = tool => {
-  stopFunction(activedTool.value);
-  if (activedTool.value === tool.name) {
-    activedTool.value = '';
-  } else {
-    activedTool.value = tool.name;
-    activeFunc(activedTool.value)
-  }
-};
+  
 
-let viewer: Cesium.Viewer;
-function activeFunc(toolName) {
-  switch (toolName) {
-    case SECTION_ANALYSIS:
-      startSelectSection();
-      break;
-    case TERRAIN_CLIP:
-      startTerrainClip();
-      break;
-  }
-}
-
-/** 剖面分析开始 */
-let sectionAnalysisIns: sectionAnalysis | undefined;
-function startSelectSection() {
-  sectionAnalysisIns = new sectionAnalysis(viewer, { drawType: CESIUM_3D_TILE });
-  sectionAnalysisIns.drawSectionsOnMap()
-}
-
-function stopSelectSection() {
-  sectionAnalysisIns && sectionAnalysisIns.stopDrawing()
-  sectionAnalysisIns = undefined;
-}
-/** 剖面分析结束 */
-
-/** 挖方分析开始 */
-let digTerrainPlanIns: digTerrainPlan | undefined;
-function startTerrainClip() {
-  digTerrainPlanIns = new digTerrainPlan(viewer, {
-    materials: {
-      bottomMaterial: "image/excavate_bottom_min.jpg",
-      wallMaterial: "image/excavate_bottom_min.jpg",
-    },
-    depth: 100,
-    lerpInterval: 50
-  });
-  digTerrainPlanIns.startClipTerrain()
-}
-function stopTerrainClip() {
-  digTerrainPlanIns && digTerrainPlanIns.stopdigTerrainPlan()
-  digTerrainPlanIns = undefined
-}
-/** 挖方分析结束 */
-
-
-
-function stopFunction(toolName) {
-  switch (toolName) {
-    case SECTION_ANALYSIS:
-      stopSelectSection()
-      break;
-    case TERRAIN_CLIP:
-      stopTerrainClip();
-      break;
-  }
-}
-
-
-export default {
-  setup() {
-    const injectViewer: { viewer: Cesium.Viewer } | undefined = inject('_viewer');
-    if (!injectViewer) {
-      throw Error("provide/inject失败");
+  // 图标高亮模块
+  let activedTool = ref('');
+  const onToolActive = tool => {
+    stopFunction(activedTool.value);
+    if (activedTool.value === tool.name) {
+      activedTool.value = '';
+    } else {
+      activedTool.value = tool.name;
+      activeFunc(activedTool.value)
     }
-    viewer = injectViewer.viewer;
+  };
 
-    return {
-      otherTools,
-      activedTool,
-      onToolActive
-    }
-  },
-  components: {
-    Tool
+  let viewer: Cesium.Viewer;
+  const injectViewer: { viewer: Cesium.Viewer } | undefined = inject('_viewer');
+  if (!injectViewer) {
+    throw Error("provide/inject失败");
   }
-}
+  viewer = injectViewer.viewer;
+  function activeFunc(toolName) {
+    switch (toolName) {
+      case SECTION_ANALYSIS:
+        startSelectSection();
+        break;
+      case TERRAIN_CLIP:
+        startTerrainClip();
+        break;
+      case VIRTUAL_DRilling:
+        startSelectDrill();
+        break;
+    }
+  }
+
+  /** 剖面分析开始 */
+  let sectionAnalysisIns: sectionAnalysis | undefined;
+  function startSelectSection() {
+    sectionAnalysisIns = new sectionAnalysis(viewer, { drawType: CESIUM_3D_TILE });
+    sectionAnalysisIns.drawSectionsOnMap()
+  }
+
+  function stopSelectSection() {
+    sectionAnalysisIns && sectionAnalysisIns.stopDrawing()
+    sectionAnalysisIns = undefined;
+  }
+  /** 剖面分析结束 */
+
+  /** 挖方分析开始 */
+  let digTerrainPlanIns: digTerrainPlan | undefined;
+  function startTerrainClip() {
+    digTerrainPlanIns = new digTerrainPlan(viewer, {
+      materials: {
+        bottomMaterial: "image/excavate_bottom_min.jpg",
+        wallMaterial: "image/excavate_bottom_min.jpg",
+      },
+      depth: 5000,
+      lerpInterval: 50
+    });
+    digTerrainPlanIns.startClipTerrain()
+  }
+  function stopTerrainClip() {
+    digTerrainPlanIns && digTerrainPlanIns.stopdigTerrainPlan()
+    digTerrainPlanIns = undefined
+  }
+  /** 挖方分析结束 */
+
+  /** 虚拟钻孔开始 */
+  let virtualDrillingIns: virtualDrilling | undefined;
+  function startSelectDrill() {
+    virtualDrillingIns = new virtualDrilling(viewer);
+    virtualDrillingIns.startSelectDrill()
+  }
+  function stopSelectDrill() {
+    virtualDrillingIns && virtualDrillingIns.stopSelectDrill()
+    virtualDrillingIns = undefined
+  }
+  /** 虚拟钻孔结束 */
+
+
+
+  function stopFunction(toolName) {
+    switch (toolName) {
+      case SECTION_ANALYSIS:
+        stopSelectSection()
+        break;
+      case TERRAIN_CLIP:
+        stopTerrainClip();
+        break;
+      case VIRTUAL_DRilling:
+        stopSelectDrill();
+        break;
+    }
+  }
 </script>
 
 <style  lang="scss" scoped>

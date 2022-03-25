@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-06-02 18:14:09
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-25 20:17:16
- * @FilePath: \cesium-web-vue\src\utils\vue-utils\draw\drawUtils.ts
+ * @LastEditTime: 2022-01-10 16:52:20
+ * @FilePath: /cesium-web-vue/src/utils/vue-utils/draw/drawUtils.ts
  */
 import {
   CallbackProperty,
@@ -163,7 +163,6 @@ class DrawPolyline {
         width: 3,
         show: true,
         clampToGround: true,
-        classificationType: ClassificationType[this.drawType],
         zIndex: 100000
       }
     })
@@ -285,7 +284,6 @@ class DrawPolygon {
         width: 3,
         show: true,
         clampToGround: true,
-        classificationType: ClassificationType[this.drawType]
       }
     })
   }
@@ -294,7 +292,6 @@ class DrawPolygon {
       polygon: {
         hierarchy: new CallbackProperty(() => new PolygonHierarchy(_positions), false),
 				material: new Color(0.1, 0.5, 0.9, 0.4),
-        classificationType: ClassificationType[this.drawType]
       }
     })
   }

@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-07-14 14:39:23
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-11 10:30:27
- * @FilePath: \cesium-web-vue\src\views\digTerrian.vue
+ * @LastEditTime: 2021-12-02 21:43:45
+ * @FilePath: /cesium-web-vue/src/views/digTerrian.vue
 -->
 <template>
   <div class="digTerrian">
@@ -73,7 +73,7 @@ function initTileset(viewer: Cesium.Viewer): Cesium.Cesium3DTileset {
   tileset.readyPromise.then((tileset: Cesium.Cesium3DTileset) => {
     const boundingSphereCenter = tileset.boundingSphere.center.clone()
     const modelMatrix = tileset.modelMatrix.clone()
-    let trans = new transform(boundingSphereCenter, modelMatrix);
+    let trans = new transform(boundingSphereCenter);
     const tmpMatrix = new Cesium.Matrix4();
     Cesium.Matrix4.multiply(
       trans.translation(109.3062, 21.66081, 5000),

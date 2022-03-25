@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-10-11 09:20:52
- * @FilePath: \cesium-web-vue\src\views\transform3Dtiles.vue
+ * @LastEditTime: 2021-12-06 08:59:38
+ * @FilePath: /cesium-web-vue/src/views/transform3Dtiles.vue
 -->
 <template>
   <div class="clip-Model">
@@ -128,7 +128,7 @@ export default defineComponent({
       tileset.readyPromise.then((tileset) => {
         boundingSphereCenter = tileset.boundingSphere.center.clone()
         modelMatrix = tileset.modelMatrix.clone()
-        let trans = new transform(boundingSphereCenter, modelMatrix);
+        let trans = new transform(boundingSphereCenter);
         const tmpMatrix = new Matrix4();
         Matrix4.multiply(
           trans.translation(state.lng, state.lat, state.height),
@@ -143,7 +143,7 @@ export default defineComponent({
     });
 
     const onChanged = () => {
-      let trans = new transform(boundingSphereCenter, modelMatrix);
+      let trans = new transform(boundingSphereCenter);
       let tmpMatrix = new Matrix4();
       Matrix4.multiply(
         trans.translation(state.lng, state.lat, state.height),

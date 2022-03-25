@@ -1,19 +1,18 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-01 09:00:36
+ * @LastEditTime: 2022-01-10 17:31:43
  * @FilePath: /cesium-web-vue/src/views/index.vue
 -->
 <template>
   <div class="index" id="mapContainer">
-    <HViewer @ready="onViewerReady"></HViewer>
+    <HViewer :infoBox="false" @ready="onViewerReady"></HViewer>
     <ToolbarGroup  v-if="isMapReady" class="toolbar-group" @onEdit3Dtiles="onEdit3Dtiles"></ToolbarGroup>
     <Control3DTiles v-if="selectedTileset" :selectedTileset="selectedTileset"></Control3DTiles>
     <MapInfo v-if="isMapReady"></MapInfo>
-    
-    <!-- <div class="btn" @click="drawPolyline">绘制线</div>
-    <div class="btn2" @click="drawPolygon">绘制面</div>
-    <div class="btn3" @click="clearPolygon">清除绘制</div> -->
+
+   <el-button class="btn btn-1" @click="flyToCity">城市模型</el-button>
+   <el-button class="btn btn-2" type="primary" @click="flyToGModel">地质模型</el-button>
   </div>
 </template>
 
@@ -31,6 +30,8 @@ import Cesium3DTilesInspector from 'cesium/Source/Widgets/Cesium3DTilesInspector
 const isKeyboardModel = ref(false)
 
 let tmp_viewer:Cesium.Viewer;
+let tileset:undefined | Cesium.Cesium3DTileset;
+let tileset2:undefined | Cesium.Cesium3DTileset;
 const _viewer: { viewer: Cesium.Viewer|null } = reactive({ viewer: null });
 // 判断Viewer组件是否准备完毕
 const isMapReady = ref(false);
@@ -45,6 +46,9 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
   // viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
   // viewer.scene.globe.show = false;
   viewer.terrainProvider = Cesium.createWorldTerrain()
+  // viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
+  //   url: "http://localhost:8099/chinaTerrain"
+  // })
   const baseLayer = viewer.scene.globe.imageryLayers.get(0);
   viewer.imageryLayers.remove(baseLayer);
   
@@ -87,7 +91,7 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
   
   // new limitClip(viewer);
   
-  const tileset = new Cesium.Cesium3DTileset({
+  tileset = new Cesium.Cesium3DTileset({
     url: "3DTiles/model3dtiles/tileset.json",
     // cullWithChildrenBounds: false,
     // cullRequestsWhileMoving: false,
@@ -103,7 +107,7 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
   tileset.readyPromise.then(tileset => {
     let boundingSphereCenter = tileset.boundingSphere.center.clone()
     let modelMatrix = tileset.modelMatrix.clone()
-    let trans = new transform(boundingSphereCenter, modelMatrix);
+    let trans = new transform(boundingSphereCenter);
     const cartographic = Cesium.Cartographic.fromCartesian(
       tileset.boundingSphere.center
     );
@@ -115,7 +119,7 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
     const offset = Cesium.Cartesian3.fromRadians(
       cartographic.longitude,
       cartographic.latitude,
-      2000
+      -2500
     );
     const translation = Cesium.Cartesian3.subtract(
       offset,
@@ -123,66 +127,14 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
       new Cesium.Cartesian3()
     );
     tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-    // const tmpMatrix = new Cesium.Matrix4();
-    // Cesium.Matrix4.multiply(
-    //   trans.translation(109.45966, 31.02833, 2000), // -5000 
-    //   trans.rotation(-9, -6, 79),
-    //   tmpMatrix
-    // );
-    
-    // tileset.modelMatrix = tmpMatrix;
 
-    /* 拾取3dtiles开始 */ 
-    const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas)
-    handler.setInputAction(movement => {
-      const cartesian1 = viewer.scene.pickPosition(movement.position);
-      const cartographic = Cesium.Cartographic.fromCartesian(cartesian1);
-      
-      const startPoint = Cesium.Cartesian3.fromDegrees(
-        Cesium.Math.toDegrees(cartographic.longitude),
-        Cesium.Math.toDegrees(cartographic.latitude),
-        cartographic.height + 1000
-      );
-
-      const endPoint = Cesium.Cartesian3.fromDegrees(
-        Cesium.Math.toDegrees(cartographic.longitude),
-        Cesium.Math.toDegrees(cartographic.latitude),
-        -9999
-      );
-
-      const greenRhumbLine = viewer.entities.add({
-        name: "Green rhumb line",
-        polyline: {
-          positions: [
-            startPoint, 
-            endPoint, 
-          ],
-          width: 5,
-          material: Cesium.Color.GREEN,
-        },
-      });
-
-      const direction = Cesium.Cartesian3.normalize(
-        Cesium.Cartesian3.subtract(
-          endPoint,
-          startPoint,
-          new Cesium.Cartesian3()
-        ),
-        new Cesium.Cartesian3()
-      );
-      const ray1 = new Cesium.Ray(startPoint, direction);
-      const scene:any = viewer.scene;
-      const result = scene.drillPickFromRay(ray1); // 计算交互点，返回第一个
-      console.log(result);
-    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
-    
-    /* 拾取3dtiles结束 */ 
-    
-    viewer.zoomTo(tileset);
+    setTimeout(() => {
+      viewer.flyTo(tileset);
+    }, 2000);
   })
  
   
-  const tileset2 = new Cesium.Cesium3DTileset({
+  tileset2 = new Cesium.Cesium3DTileset({
     url: Cesium.IonResource.fromAssetId(354759)
   })
   viewer.scene.primitives.add(tileset2);
@@ -190,7 +142,7 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
   tileset2.readyPromise.then(tileset => {
     let boundingSphereCenter = tileset.boundingSphere.center.clone()
     let modelMatrix = tileset.modelMatrix.clone()
-    let trans = new transform(boundingSphereCenter, modelMatrix);
+    let trans = new transform(boundingSphereCenter);
     const tmpMatrix = new Cesium.Matrix4();
     Cesium.Matrix4.multiply(
       trans.translation(109.46266, 31.02533, 200), // -40
@@ -199,7 +151,6 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
     );
     
     tileset.modelMatrix = tmpMatrix;
-    // viewer.zoomTo(tileset);
   })
 
   const tileset3 = new Cesium.Cesium3DTileset({
@@ -210,7 +161,7 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
   tileset3.readyPromise.then(tileset => {
     let boundingSphereCenter = tileset.boundingSphere.center.clone()
     let modelMatrix = tileset.modelMatrix.clone()
-    let trans = new transform(boundingSphereCenter, modelMatrix);
+    let trans = new transform(boundingSphereCenter);
     const tmpMatrix = new Cesium.Matrix4();
     Cesium.Matrix4.multiply(
       trans.translation(113.805972, 27.664014, -1800), // -1800
@@ -222,6 +173,8 @@ const onViewerReady = (viewer: Cesium.Viewer) => {
     
     // viewer.zoomTo(tileset);
   })
+
+ 
 };
 
 export default defineComponent({
@@ -236,12 +189,28 @@ export default defineComponent({
     }
     /** selectedTileset赋值结束 */
 
+    /** 按钮跳转开始 */
+    const flyToCity = () => {
+      if(tileset2) {
+        _viewer.viewer?.flyTo(tileset2)
+      }
+    }
+    const flyToGModel = () => {
+      if(tileset) {
+        _viewer.viewer?.flyTo(tileset)
+      }
+    }
+    /** 按钮跳转结束 */
+
+
     return {
       isKeyboardModel,
       isMapReady,
       onViewerReady,
       onEdit3Dtiles,
-      selectedTileset
+      selectedTileset,
+      flyToCity,
+      flyToGModel
     }
   },
   components: {
@@ -290,19 +259,13 @@ export default defineComponent({
     height: 100%;
   }
 
-  .btn, .btn2, .btn3, .btn4 {
+  .btn {
     position: absolute;
     top: 10px;
-    left: 10px;
-    width: 80px;
-    height: 25px;
-    line-height: 25px;
-    text-align: center;
-    color: white;
-    cursor: pointer;
-    background-color: rgba(255, 0, 0, 0.8);
-    border-radius: 25px;
-    border: 1px white;
+    right: 120px;
+  }
+  .btn-2 {
+    right: 10px;
   }
   .btn2 {
     top: 45px;

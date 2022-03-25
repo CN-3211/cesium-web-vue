@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-06-16 15:54:32
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-24 09:17:18
- * @FilePath: \cesium-web-vue\src\utils\c-utils.ts
+ * @LastEditTime: 2021-12-03 09:20:38
+ * @FilePath: /cesium-web-vue/src/utils/c-utils.ts
  */
 
 import { Viewer, Cartesian2, Cartesian3, Ellipsoid, EllipsoidTerrainProvider, Model, Cesium3DTileset, Cesium3DTileFeature, Cartographic, ScreenSpaceEventHandler, ScreenSpaceEventType } from 'cesium';
@@ -22,6 +22,21 @@ function createHandler(canvas: HTMLCanvasElement, callback: (...params: any[]) =
   handler.setInputAction(callback, type)
 
   return handler
+}
+
+function changeCar3ToLnglat(car3: Cartesian3) {
+  const cartographic = Cartographic.fromCartesian(car3);
+  const lng = CMath.toDegrees(cartographic.longitude);
+  const lat = CMath.toDegrees(cartographic.latitude);
+  const height = cartographic.height;
+  return { 
+    lng: Number(lng.toFixed(6)),
+    lat: Number(lat.toFixed(6)),
+    height: Number(height.toFixed(2)),
+    _lng: lng,
+    _lat: lat,
+    _height: height
+  }
 }
 
 /**
@@ -125,5 +140,6 @@ function transformWGS84ToCartesian(position, viewer: Viewer, alt?) {
 
 export {
   createHandler,
+  changeCar3ToLnglat,
   getCatesian3FromPX
 }

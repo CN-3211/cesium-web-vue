@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-06-10 09:13:02
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-27 13:55:07
- * @FilePath: \cesium-web-vue\src\utils\vue-utils\transform\transform.ts
+ * @LastEditTime: 2021-12-10 09:49:57
+ * @FilePath: /cesium-web-vue/src/utils/vue-utils/transform/transform.ts
  */
 import * as Cesium from 'cesium'
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
@@ -11,10 +11,8 @@ import Matrix4 from 'cesium/Source/Core/Matrix4';
 
 export default class transform {
   static boundingSphereCenter: Cesium.Cartesian3
-  static modelMatrix: Cesium.Matrix4
-  constructor(boundingSphereCenter: Cesium.Cartesian3, modelMatrix: Cesium.Matrix4) {
+  constructor(boundingSphereCenter: Cesium.Cartesian3) {
     transform.boundingSphereCenter = boundingSphereCenter;
-    transform.modelMatrix = modelMatrix;
   }
   /**
    * @description: 平移
@@ -68,7 +66,7 @@ export default class transform {
   }
 
   static handleTransform(rotateM3: Cesium.Matrix3) {
-    const tmp = Cesium.Matrix4.clone(transform.modelMatrix);
+    const tmp = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
     const tilesetMat: Cesium.Matrix4 = Cesium.Matrix4.fromArray(Matrix4.toArray(tmp));
     const tilesetMatRotation: Cesium.Matrix4 = Cesium.Matrix4.getMatrix3(tilesetMat, new Cesium.Matrix3());
     const inverseTilesetMatRotation: Matrix3 = Cesium.Matrix3.inverse(tilesetMatRotation, new Cesium.Matrix3());

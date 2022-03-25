@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-10-26 21:56:32
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-27 13:45:21
- * @FilePath: \cesium-web-vue\src\components\ToolInfoControl\control3DTiles.vue
+ * @LastEditTime: 2021-12-03 10:34:58
+ * @FilePath: /cesium-web-vue/src/components/ToolInfoControl/control3DTiles.vue
 -->
 <template>
   <div class="control3DTiles">
@@ -15,7 +15,7 @@
         :show-input="true"
         :show-input-controls="false"
         input-size="mini"
-        @input="onChanged"
+        @input="onTransChanged"
       ></el-slider>
     </div>
     <div class="slip">
@@ -27,7 +27,7 @@
         :show-input="true"
         :show-input-controls="false"
         input-size="mini"
-        @input="onChanged"
+        @input="onTransChanged"
       ></el-slider>
     </div>
     <div class="slip">
@@ -39,34 +39,38 @@
         :show-input="true"
         :show-input-controls="false"
         input-size="mini"
-        @input="onChanged"
+        @input="onTransChanged"
       ></el-slider>
     </div>
     <div class="adjustPosition">
       <span class="demonstration">经度：</span>
       <el-input-number
         v-model="state.lng"
-        @change="onChanged"
+        @change="onTransChanged"
         :min="0"
         :max="180"
-        label="请输入精度"
+        label="请输入经度"
         :step="0.001"
       ></el-input-number>
     </div>
     <div class="adjustPosition">
       <span class="demonstration">纬度：</span>
-      <el-input-number v-model="state.lat" :min="0" :max="90" :step="0.001" @change="onChanged"></el-input-number>
+      <el-input-number v-model="state.lat" :min="0" :max="90" :step="0.001" @change="onTransChanged"></el-input-number>
     </div>
     <div class="adjustPosition">
       <span class="demonstration">高度：</span>
-      <el-input-number v-model="state.height" @input="onChanged" :step="100"></el-input-number>
+      <el-input-number v-model="state.height" @input="onTransChanged" :step="100"></el-input-number>
+    </div>
+    <div class="adjustPosition">
+      <span class="demonstration">缩放：</span>
+      <el-input-number v-model="state.scale" @input="onScaleChanged" :precision="2" :step="0.1" :max="10" />
     </div>
     <el-button @click="zoomToTileset">视角定位至模型</el-button>
   </div>
 </template>
 
 <script lang="ts">
-import { reactive, onMounted, defineComponent, inject } from "vue";
+import { reactive, defineComponent, inject } from "vue";
 
 import {
   Viewer,
@@ -75,6 +79,7 @@ import {
   Cesium3DTileset,
 } from "cesium";
 import transform from "@/utils/vue-utils/transform/transform";
+import { changeCar3ToLnglat } from '@/utils/c-utils';
 
 let boundingSphereCenter: Cartesian3;
 let modelMatrix: Matrix4;
@@ -91,40 +96,44 @@ export default defineComponent({
     if(!injectViewer) {
       throw Error("provide/inject失败");
     }
+    
+    boundingSphereCenter = props.selectedTileset.boundingSphere.center.clone();
+    modelMatrix = props.selectedTileset.modelMatrix.clone();
+    const lnglat = changeCar3ToLnglat(boundingSphereCenter);
     const state = reactive({
       rotateX: 0,
       rotateY: 0,
       rotateZ: 0,
-      lng: 113.805972,
-      lat: 27.664014,
-      height: -1500
+      lng: lnglat.lng,
+      lat: lnglat.lat,
+      height: lnglat.height,
+      scale: 1
     });
+    
 
-    onMounted(() => {
-      props.selectedTileset.readyPromise.then((tileset) => {
-        boundingSphereCenter = tileset.boundingSphere.center.clone();
-        modelMatrix = tileset.modelMatrix.clone();
-
-        console.log('boundingSphereCenter :>> ', boundingSphereCenter);
-        console.log('modelMatrix :>> ', modelMatrix);
-      });
-    });
-
-
-    const onChanged = () => {
+    const onTransChanged = () => {
       const selectedTileset = props.selectedTileset;
       
-      let trans = new transform(boundingSphereCenter, modelMatrix);
+      let trans = new transform(boundingSphereCenter);
       const tmpMatrix = new Matrix4();
       Matrix4.multiply(
         trans.translation(state.lng, state.lat, state.height),
         trans.rotation(state.rotateX, state.rotateY, state.rotateZ),
         tmpMatrix
       );
-      
 
+      Matrix4.multiply(
+        tmpMatrix,
+        modelMatrix,
+        tmpMatrix
+      );
+  
       selectedTileset.modelMatrix = tmpMatrix;
     };
+
+    const onScaleChanged = () => {
+      console.log('112 :>> ', 112);
+    }
 
     const zoomToTileset = () => {
       injectViewer.viewer.zoomTo(props.selectedTileset)
@@ -132,7 +141,8 @@ export default defineComponent({
 
     return {
       state,
-      onChanged,
+      onTransChanged,
+      onScaleChanged,
       zoomToTileset
     };
   },

@@ -89,7 +89,7 @@
       ElMessage('viewer尚未初始化');
       return;
     }
-    DrawPolylineIns = new DrawPolyline(_viewer.viewer, { drawType: CESIUM_3D_TILE });
+    DrawPolylineIns = new DrawPolyline(_viewer.viewer);
     /** 要支持连续绘制 */
     DrawPolylineIns.startCreate();
     /** 要支持连续绘制 */
@@ -105,7 +105,7 @@
       ElMessage('viewer尚未初始化');
       return;
     }
-    DrawPolygonIns = new DrawPolygon(_viewer.viewer, { drawType: CESIUM_3D_TILE });
+    DrawPolygonIns = new DrawPolygon(_viewer.viewer);
     DrawPolygonIns.startCreate();
   };
   const stopPolygon = () => {
