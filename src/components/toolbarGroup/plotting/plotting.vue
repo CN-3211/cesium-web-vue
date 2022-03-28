@@ -5,18 +5,14 @@
         <Tool :name="item.name" :icon="item.icon" :isActive="item.name === activedTool" @click="onToolActive(item)"></Tool>
       </el-col>
     </el-row>
-    <p>模型标绘</p>
-    <el-row>
-      <el-col :span="8" v-for="item in modelPlottingTools" :key="item">
-        <Tool :name="item.name" :icon="item.icon" :isActive="item.name === activedTool" @click="onToolActive(item)"></Tool>
-      </el-col>
-    </el-row>
   </div>
 </template>
 
-<script lang="ts">
-  import {ref, defineComponent, inject, reactive} from "vue";
-  import Cesium from 'cesium';
+<script lang="ts" setup>
+  import { ref, inject } from "vue";
+  import type { CesiumRef } from '@/@types/index';
+  import { CESIUM_REF_KEY } from '@/libs/cesium-vue';
+
   import { ElMessage } from 'element-plus'
   import Tool from '../tool.vue'
   
@@ -33,9 +29,11 @@
     { name: PLOT_POLYGON, icon:"icon-xuanmianmianji" }
   ]);
   
-  const modelPlottingTools = ref({
-  
-  });
+  const cesiumRef = inject<CesiumRef>(CESIUM_REF_KEY);
+  if (!cesiumRef || !cesiumRef.viewer) {
+    throw new Error('No cesium reference exist.')
+  }
+  const viewer = cesiumRef.viewer;
   
   // 图标高亮模块
   let activedTool = ref('');
@@ -81,15 +79,12 @@
     }
   }
   
-  let _viewer:{ viewer: Cesium.Viewer };
+
   
   let DrawPolylineIns:DrawPolyline|undefined;
   const drawPolyline = ():void => {
-    if(!_viewer.viewer) {
-      ElMessage('viewer尚未初始化');
-      return;
-    }
-    DrawPolylineIns = new DrawPolyline(_viewer.viewer);
+
+    DrawPolylineIns = new DrawPolyline(viewer);
     /** 要支持连续绘制 */
     DrawPolylineIns.startCreate();
     /** 要支持连续绘制 */
@@ -101,11 +96,7 @@
   
   let DrawPolygonIns: DrawPolygon|undefined;
   const drawPolygon = () => {
-    if(!_viewer.viewer) {
-      ElMessage('viewer尚未初始化');
-      return;
-    }
-    DrawPolygonIns = new DrawPolygon(_viewer.viewer);
+    DrawPolygonIns = new DrawPolygon(viewer);
     DrawPolygonIns.startCreate();
   };
   const stopPolygon = () => {
@@ -115,41 +106,13 @@
 
   let DrawBillboardIns: DrawBillboard|undefined;
   const drawBillboard = () => {
-    if(!_viewer.viewer) {
-      ElMessage('viewer尚未初始化');
-      return;
-    }
-    DrawBillboardIns = new DrawBillboard(_viewer.viewer);
+    DrawBillboardIns = new DrawBillboard(viewer);
     DrawBillboardIns.startCreate();
   };
   const stopBillboard = () => {
     DrawBillboardIns && DrawBillboardIns.stopDrawing();
     DrawBillboardIns = undefined;
   };
-
-  
-  
-  export default defineComponent({
-    setup() {
-      const injectViewer: {viewer: Cesium.Viewer} | undefined = inject('_viewer');
-      if(!injectViewer) {
-        throw Error("provide/inject失败");
-      }
-      
-      _viewer = injectViewer;
-  
-      return {
-        plottingTools,
-        onToolActive,
-        activedTool,
-        modelPlottingTools
-      }
-    },
-    components: {
-      Tool
-    }
-  })
-  
 </script>
 
 <style  lang="scss" scoped>

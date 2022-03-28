@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-10-28 22:04:56
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-28 21:50:00
+ * @LastEditTime: 2022-03-28 20:55:54
  * @FilePath: /cesium-web-vue/src/components/mapInfo/mapInfo.vue
 -->
 <template>
@@ -18,17 +18,17 @@
 </template>
 
 <script lang="ts" setup>
-  import { Viewer } from "cesium";
   import { inject, reactive } from "vue";
+  import type { CesiumRef } from '@/@types/index';
+  import { CESIUM_REF_KEY } from '@/libs/cesium-vue';
+
   import { pickMousePosition, computeMapScale } from './mapInfo';
-
-
   // const infoHandler = new Cesium.ScreenSpaceEventHandler();
-  const injectViewer: {viewer: Viewer} | undefined = inject('_viewer');
-  if(!injectViewer) {
-    throw Error("provide/inject失败");
+  const cesiumRef = inject<CesiumRef>(CESIUM_REF_KEY);
+  if (!cesiumRef || !cesiumRef.viewer) {
+    throw new Error('No cesium reference exist.')
   }
-  const viewer:Viewer = injectViewer.viewer;
+  const viewer = cesiumRef.viewer;
 
   const infos = reactive({
     lat: '',

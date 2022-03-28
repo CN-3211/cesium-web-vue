@@ -1,11 +1,10 @@
 /*
  * @Date: 2022-01-10 15:35:51
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-01-10 16:32:36
+ * @LastEditTime: 2022-03-28 19:48:56
  * @FilePath: /cesium-web-vue/src/components/toolbarGroup/analysis/virtualDrilling.ts
  */
-import { Entity ,Viewer, ScreenSpaceEventHandler, ScreenSpaceEventType, Cartographic, Cartesian3, Ray, Color, Cesium3DTileFeature } from 'cesium';
-import CMath from 'cesium/Source/Core/Math';
+import { Math as CMath, Entity ,Viewer, ScreenSpaceEventHandler, ScreenSpaceEventType, Cartographic, Cartesian3, Ray, Color, Cesium3DTileFeature } from 'cesium';
 import { ElNotification } from 'element-plus'
 
 export default class virtualDrilling {

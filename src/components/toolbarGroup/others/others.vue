@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-10-26 21:56:32
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-27 09:47:04
- * @FilePath: \cesium-web-vue\src\components\toolbarGroup\others\others.vue
+ * @LastEditTime: 2022-03-28 21:04:44
+ * @FilePath: /cesium-web-vue/src/components/toolbarGroup/others/others.vue
 -->
 <template>
   <div class="others">
@@ -14,9 +14,12 @@
   </div>
 </template>
 
-<script lang="ts">
-  import { Cesium3DTileset, Viewer, ScreenSpaceEventHandler } from "cesium";
-  import {inject, ref, Ref, defineComponent, watch } from "vue";
+<script lang="ts" setup>
+  import { Cesium3DTileset, ScreenSpaceEventHandler } from "cesium";
+  import {inject, ref, Ref, watch, getCurrentInstance } from "vue";
+  import type { CesiumRef } from '@/@types/index';
+  import { CESIUM_REF_KEY } from '@/libs/cesium-vue';
+
   import interaction from '@/utils/vue-utils/keyboardInteraction/index';
   import Tool from '../tool.vue'
   import { selectTileset } from '@/utils/vue-utils/handle3DTiles/index';
@@ -29,6 +32,14 @@
     { name: CAMERA_TUTORIAL, icon:"icon-manyou" },
     { name: EDIT_3DTILES, icon:"icon-manyou" },
   ]);
+
+  const ins = getCurrentInstance();
+
+  const cesiumRef = inject<CesiumRef>(CESIUM_REF_KEY);
+  if (!cesiumRef || !cesiumRef.viewer) {
+    throw new Error('No cesium reference exist.')
+  }
+  const viewer = cesiumRef.viewer;
 
   // 图标高亮模块
   let activedTool = ref('');
@@ -57,16 +68,14 @@
     }
   }
 
-  let _viewer:{ viewer: Viewer };
-
   /** 键盘漫游开始 */
   let _interaction: interaction;
   function startTutorial() {
-    _interaction = new interaction(_viewer.viewer);
-    _interaction.onClockTick(_viewer.viewer)
+    _interaction = new interaction(viewer);
+    _interaction.onClockTick(viewer)
   }
   function stopTutorial() {
-    _interaction && _interaction.removeAllEventAndHandler(_viewer.viewer);
+    _interaction && _interaction.removeAllEventAndHandler(viewer);
   }
   /** 键盘漫游结束 */
 
@@ -74,7 +83,7 @@
   let pickHandler: ScreenSpaceEventHandler
   let selectedTileset: Ref<Cesium3DTileset|undefined> = ref(undefined)
   function startModelEdit() {
-    pickHandler = selectTileset(_viewer.viewer, tileset => {
+    pickHandler = selectTileset(viewer, tileset => {
       selectedTileset.value = tileset;
     });
   }
@@ -96,28 +105,11 @@
         break;
     }
   }
-  
-  export default defineComponent({
-    setup(props, context) {
-      const injectViewer: {viewer: Viewer} | undefined = inject('_viewer');
-      if(!injectViewer) {
-        throw Error("provide/inject失败");
-      }
-      _viewer = injectViewer;
 
-      watch(selectedTileset, (val) => {
-        context.emit('onEdit3Dtiles', val)
-      })
-      return {
-        otherTools,
-        activedTool,
-        onToolActive
-      }
-    },
-    components: {
-      Tool
-    }
+  watch(selectedTileset, (val) => {
+    ins && ins.emit('onEdit3Dtiles', val)
   })
+  
 </script>
 
 <style  lang="scss" scoped>

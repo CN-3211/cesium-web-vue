@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-11-04 21:58:18
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-01-10 14:27:28
+ * @LastEditTime: 2022-03-28 20:56:45
  * @FilePath: /cesium-web-vue/src/components/toolbarGroup/Scenes/index.vue
 -->
 <template>
@@ -21,6 +21,9 @@
 
 <script lang="ts" setup>
   import * as Cesium from "cesium";
+  import type { CesiumRef } from '@/@types/index';
+  import { CESIUM_REF_KEY } from '@/libs/cesium-vue';
+
   import { inject, ref, watch } from "vue";
   import Tool from '../tool.vue'
   import rainEffect from './rain';
@@ -33,12 +36,11 @@
   ]);
 
 
-  let viewer: Cesium.Viewer;
-  const injectViewer: { viewer: Cesium.Viewer } | undefined = inject('_viewer');
-  if (!injectViewer) {
-    throw Error("provide/inject失败");
+  const cesiumRef = inject<CesiumRef>(CESIUM_REF_KEY);
+  if (!cesiumRef || !cesiumRef.viewer) {
+    throw new Error('No cesium reference exist.')
   }
-  viewer = injectViewer.viewer;
+  const viewer = cesiumRef.viewer;
 
   function activeFunc(toolName) {
     switch (toolName) {

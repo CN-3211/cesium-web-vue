@@ -1,12 +1,11 @@
 /*
  * @Date: 2021-12-28 20:05:14
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-29 10:00:04
+ * @LastEditTime: 2022-03-28 19:48:05
  * @FilePath: /cesium-web-vue/src/components/mapInfo/mapInfo.ts
  */
 import { throttle } from '@/utils/index';
-import { Viewer, ScreenSpaceEventHandler, Cartesian2, ScreenSpaceEventType, EllipsoidGeodesic } from 'cesium';
-import CMath from 'cesium/Source/Core/Math';
+import { Viewer, ScreenSpaceEventHandler, Cartesian2, ScreenSpaceEventType, EllipsoidGeodesic, Math as CMath } from 'cesium';
 interface infos { lng: string, lat: string, height: string, ViewpointsHeight: string, scale: string }
 
 const computeMapScale = (viewer: Viewer, infos: infos) => {
@@ -20,6 +19,9 @@ const computeMapScale = (viewer: Viewer, infos: infos) => {
   viewer.scene.postRender.addEventListener(() => { 
     const leftPixelRay = viewer.scene.camera.getPickRay(leftPixelPosition)
     const rightPixelRay = viewer.scene.camera.getPickRay(rightPixelPosition)
+    if(!leftPixelRay || !rightPixelRay) {
+      return;
+    }
     // 两个像素点在globe上对应的Cartesian3坐标
     const leftPixelCar3 = globe.pick(leftPixelRay, viewer.scene);
     const rightPixelCar3 = globe.pick(rightPixelRay, viewer.scene);
@@ -52,10 +54,11 @@ const pickMousePosition = (viewer: Viewer, infos: infos): any => {
   const handler3D = new ScreenSpaceEventHandler(viewer.scene.canvas);
   const handlerFunc = movement => {
     const pick = new Cartesian2(movement.endPosition.x, movement.endPosition.y);
-    if (!pick) {
+    const pickRay = viewer.camera.getPickRay(pick);
+    if (!pickRay) {
       return
     }
-    const cartesian = viewer.scene.globe.pick(viewer.camera.getPickRay(pick), viewer.scene);
+    const cartesian = viewer.scene.globe.pick(pickRay, viewer.scene);
     if (!cartesian) {
       return
     }

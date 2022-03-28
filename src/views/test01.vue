@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-29 09:47:26
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-01-08 22:36:56
+ * @LastEditTime: 2022-03-28 19:25:53
  * @FilePath: /cesium-web-vue/src/views/test01.vue
 -->
 <template>
@@ -9,10 +9,6 @@
     <Viewer></Viewer>
   </div>
 </template>
-
-<script lang="ts" setup>
-import Viewer from '@/Dcomponents/Viewer/index.vue';
-</script>
 
 <style lang="scss" scoped>
 .test01 {

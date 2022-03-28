@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-07-23 15:25:16
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-23 15:36:43
- * @FilePath: \cesium-web-vue\src\composables\use-promise.ts
+ * @LastEditTime: 2022-03-28 19:20:41
+ * @FilePath: /cesium-web-vue/src/composables/use-promise.ts
  */
 import { ref } from 'vue';
 
@@ -17,7 +17,7 @@ export default function usePromise(fn) {
     result.value = null;
     try {
       result.value = await fn(...args)
-    } catch (err) {
+    } catch (err:any) {
       error.value = err;
     } finally {
       loading.value = false

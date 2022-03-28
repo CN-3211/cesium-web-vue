@@ -1,11 +1,10 @@
 /*
  * @Date: 2021-11-17 12:01:46
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-10 09:39:18
+ * @LastEditTime: 2022-03-28 19:49:15
  * @FilePath: /cesium-web-vue/src/utils/vue-utils/digTerrain/index.ts
  */
-import { WallGraphics, sampleTerrainMostDetailed, PolygonHierarchy, Entity, Viewer, Cartesian3, ClippingPlane, ClippingPlaneCollection, Cartographic, Color, ImageMaterialProperty, Cartesian2 } from 'cesium';
-import CMath from 'cesium/Source/Core/Math';
+import { Math as CMath, WallGraphics, sampleTerrainMostDetailed, PolygonHierarchy, Entity, Viewer, Cartesian3, ClippingPlane, ClippingPlaneCollection, Cartographic, Color, ImageMaterialProperty, Cartesian2 } from 'cesium';
 import { DrawPolygon } from "@/utils/vue-utils/draw/drawUtils";
 
 /**

@@ -1,12 +1,11 @@
 /*
  * @Date: 2021-06-16 15:54:32
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-03 09:20:38
+ * @LastEditTime: 2022-03-28 19:49:06
  * @FilePath: /cesium-web-vue/src/utils/c-utils.ts
  */
 
-import { Viewer, Cartesian2, Cartesian3, Ellipsoid, EllipsoidTerrainProvider, Model, Cesium3DTileset, Cesium3DTileFeature, Cartographic, ScreenSpaceEventHandler, ScreenSpaceEventType } from 'cesium';
-import CMath from 'cesium/Source/Core/Math';
+import { Math as CMath, Viewer, Cartesian2, Cartesian3, Ellipsoid, EllipsoidTerrainProvider, Model, Cesium3DTileset, Cesium3DTileFeature, Cartographic, ScreenSpaceEventHandler, ScreenSpaceEventType } from 'cesium';
 
 
 /**

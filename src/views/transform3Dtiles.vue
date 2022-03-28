@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-06 08:59:38
+ * @LastEditTime: 2022-03-28 21:52:03
  * @FilePath: /cesium-web-vue/src/views/transform3Dtiles.vue
 -->
 <template>
@@ -86,14 +86,12 @@ import {
   Matrix4,
   Cartesian3,
   Viewer,
-  ScreenSpaceEventHandler,
   Cesium3DTileset,
-  Rectangle,
+  createWorldTerrain
 } from "cesium";
 import transform from "@/utils/vue-utils/transform/transform";
 import DrawPolygon from '@/utils/js-utils/draw/CreatePolygon';
 import TerrainClipPlan from '@/utils/js-utils/terrainClip/TerrainClipPlan';
-import createWorldTerrain from 'cesium/Source/Core/createWorldTerrain';
 
 let tileset: Cesium3DTileset;
 let boundingSphereCenter: Cartesian3;

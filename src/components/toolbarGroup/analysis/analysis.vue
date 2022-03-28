@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-11-04 21:58:18
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-01-10 19:22:29
+ * @LastEditTime: 2022-03-28 21:43:53
  * @FilePath: /cesium-web-vue/src/components/toolbarGroup/analysis/analysis.vue
 -->
 <template>
@@ -20,13 +20,15 @@
 </template>
 
 <script lang="ts" setup>
-  import * as Cesium from "cesium";
   import { inject, ref, watch } from "vue";
+  import type { CesiumRef } from '@/@types/index';
+  import { CESIUM_REF_KEY } from '@/libs/cesium-vue';
+
   import Tool from '../tool.vue'
   import { sectionAnalysis, } from './sectionAnalysis';
   import { digTerrainPlan } from './digAnalysis';
   import virtualDrilling from './virtualDrilling';
-  import { CESIUM_3D_TILE, TERRAIN } from '@/constant/index';
+  import { CESIUM_3D_TILE } from '@/constant/index';
 
   // 配置文件模块
   const SECTION_ANALYSIS = "剖面分析";
@@ -39,7 +41,10 @@
     { name: VIRTUAL_DRilling, icon: "icon-wadong" },
   ]);
 
-  
+  const cesiumRef = inject<CesiumRef>(CESIUM_REF_KEY);
+  if (!cesiumRef || !cesiumRef.viewer) {
+    throw new Error('No cesium reference exist.')
+  }
 
   // 图标高亮模块
   let activedTool = ref('');
@@ -53,12 +58,8 @@
     }
   };
 
-  let viewer: Cesium.Viewer;
-  const injectViewer: { viewer: Cesium.Viewer } | undefined = inject('_viewer');
-  if (!injectViewer) {
-    throw Error("provide/inject失败");
-  }
-  viewer = injectViewer.viewer;
+
+  const viewer = cesiumRef.viewer;
   function activeFunc(toolName) {
     switch (toolName) {
       case SECTION_ANALYSIS:

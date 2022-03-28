@@ -1,13 +1,10 @@
 /*
  * @Date: 2021-06-10 09:13:02
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-12-10 09:49:57
+ * @LastEditTime: 2022-03-28 19:28:08
  * @FilePath: /cesium-web-vue/src/utils/vue-utils/transform/transform.ts
  */
 import * as Cesium from 'cesium'
-import Cartesian3 from 'cesium/Source/Core/Cartesian3';
-import Matrix3 from 'cesium/Source/Core/Matrix3';
-import Matrix4 from 'cesium/Source/Core/Matrix4';
 
 export default class transform {
   static boundingSphereCenter: Cesium.Cartesian3
@@ -25,24 +22,24 @@ export default class transform {
     const cartographic:Cesium.Cartographic = Cesium.Cartographic.fromCartesian(
       transform.boundingSphereCenter
     );
-    const surface:Cartesian3 = Cartesian3.fromRadians(
+    const surface:Cesium.Cartesian3 = Cesium.Cartesian3.fromRadians(
       cartographic.longitude,
       cartographic.latitude,
       cartographic.height
     );
     
-    const offset:Cartesian3 = Cartesian3.fromDegrees(lng, lat, height);
+    const offset:Cesium.Cartesian3 = Cesium.Cartesian3.fromDegrees(lng, lat, height);
 
-    const translation:Cartesian3 = Cartesian3.subtract(
+    const translation:Cesium.Cartesian3 = Cesium.Cartesian3.subtract(
       offset,
       surface,
-      new Cartesian3()
+      new Cesium.Cartesian3()
     );
 
     // 最终的平移矩阵
-    return Matrix4.fromTranslation(
+    return Cesium.Matrix4.fromTranslation(
       translation,
-      new Matrix4()
+      new Cesium.Matrix4()
     );
   }
   
@@ -67,17 +64,17 @@ export default class transform {
 
   static handleTransform(rotateM3: Cesium.Matrix3) {
     const tmp = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
-    const tilesetMat: Cesium.Matrix4 = Cesium.Matrix4.fromArray(Matrix4.toArray(tmp));
+    const tilesetMat: Cesium.Matrix4 = Cesium.Matrix4.fromArray(Cesium.Matrix4.toArray(tmp));
     const tilesetMatRotation: Cesium.Matrix4 = Cesium.Matrix4.getMatrix3(tilesetMat, new Cesium.Matrix3());
-    const inverseTilesetMatRotation: Matrix3 = Cesium.Matrix3.inverse(tilesetMatRotation, new Cesium.Matrix3());
-    const tilesetMatTranslation: Cartesian3 = Cesium.Matrix4.getTranslation(tilesetMat, new Cesium.Cartesian3())
+    const inverseTilesetMatRotation: Cesium.Matrix3 = Cesium.Matrix3.inverse(tilesetMatRotation, new Cesium.Matrix3());
+    const tilesetMatTranslation: Cesium.Cartesian3 = Cesium.Matrix4.getTranslation(tilesetMat, new Cesium.Cartesian3())
 
     // 创建以tileset的中心为原点的坐标系
-    const originMat: Matrix4 = Cesium.Transforms.eastNorthUpToFixedFrame(transform.boundingSphereCenter);
-    const originMatRotation: Matrix3 = Cesium.Matrix4.getMatrix3(originMat, new Cesium.Matrix3());
-    const originMatTranslation: Cartesian3 = Cesium.Matrix4.getTranslation(originMat, new Cesium.Cartesian3());
+    const originMat: Cesium.Matrix4 = Cesium.Transforms.eastNorthUpToFixedFrame(transform.boundingSphereCenter);
+    const originMatRotation: Cesium.Matrix3 = Cesium.Matrix4.getMatrix3(originMat, new Cesium.Matrix3());
+    const originMatTranslation: Cesium.Cartesian3 = Cesium.Matrix4.getTranslation(originMat, new Cesium.Cartesian3());
 
-    const tilesetToOriginTranslation:Matrix4 = Cesium.Matrix4.fromTranslation(
+    const tilesetToOriginTranslation:Cesium.Matrix4 = Cesium.Matrix4.fromTranslation(
       // 为什么要subtract？
       // tileset减origin得到的矩阵能将模型负向移动origin的偏移量
       Cesium.Cartesian3.subtract(tilesetMatTranslation, originMatTranslation, new Cesium.Cartesian3())
@@ -89,7 +86,7 @@ export default class transform {
       , new Cesium.Matrix4())
     )
 
-    const rotateM4:Matrix4 = Cesium.Matrix4.fromRotationTranslation(rotateM3)
+    const rotateM4:Cesium.Matrix4 = Cesium.Matrix4.fromRotationTranslation(rotateM3)
 
     // 转过去
     Cesium.Matrix4.multiply(originMat, rotateM4, originMat);

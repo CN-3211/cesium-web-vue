@@ -1,8 +1,8 @@
 <!--
  * @Date: 2021-06-05 14:02:53
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-07-12 09:49:18
- * @FilePath: \cesium-web-vue\src\components\viewer\hViewer.vue
+ * @LastEditTime: 2022-03-28 16:21:17
+ * @FilePath: /cesium-web-vue/src/components/viewer/hViewer.vue
 -->
 
 <script lang="ts">
@@ -10,17 +10,18 @@ import { onMounted, defineComponent, ExtractPropTypes, h, reactive } from 'vue'
 import { Viewer } from 'cesium';
 import defaultViewerProps from './defaultViewerProps';
 
+import { LOADED_EVENT } from './constant';
+
 
 export default defineComponent({
   props: defaultViewerProps,
-  emits: ["ready"],
   setup(props:ExtractPropTypes<typeof defaultViewerProps>, { emit }) {
     onMounted(() => {
       const { id, ...options } = reactive(props);
       // @ts-ignore
       const viewer:Viewer = new Viewer(id, options);
       viewer.cesiumWidget.creditContainer.remove();
-      emit("ready", viewer);
+      emit(LOADED_EVENT, viewer);
     });
     return () => h('div', {
       id: props.id,

@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-08-07 09:42:39
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-03-25 14:47:26
+ * @LastEditTime: 2022-03-26 16:46:10
  * @FilePath: /cesium-web-vue/src/views/stencilClip.ts
  */
 import * as THREE from 'three';
@@ -258,9 +258,9 @@ export default class stencilClip {
     container.addEventListener('dblclick', _dbEvent, false);
   }
   endSelectRouter(container: HTMLElement) {
-    this._scene.remove(this.lineGroup);
+    // this._scene.remove(this.lineGroup);
     this.clipModel();
-    this._scene.remove(this.modelGroup);
+    // this._scene.remove(this.modelGroup);
     container.removeEventListener('dblclick', _dbEvent)
   }
   onlyShowPlanes(isShowPlanes) {
@@ -289,7 +289,7 @@ export default class stencilClip {
           //   console.log('plane.normal :>> ', plane.normal);
           // }
           /* 本来lookAt用于camera，传入的(x, y, z)就代表camera所朝向的物体坐标
-           * 在这里lookAt用于po上，此时(x,y,z)，代表po应该朝向的点。
+           * 在这里lookAt用于po上，此时(x,y,z)，代表po应该朝向的点。在这里该点在裁切面法线反向延长线
            * webGL中的lookAt函数三个变量分别是：eye，target，up，需要与threeJS封装后的lookAt区分
            * threeJS封装后的lookAt只需要关注物体（camera）朝向的坐标，无需关心up
           */

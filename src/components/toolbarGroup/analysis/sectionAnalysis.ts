@@ -1,8 +1,8 @@
 /*
  * @Date: 2021-11-05 20:44:03
  * @LastEditors: huangzh873
- * @LastEditTime: 2021-11-22 15:39:03
- * @FilePath: \cesium-web-vue\src\components\toolbarGroup\analysis\sectionAnalysis.ts
+ * @LastEditTime: 2022-03-28 19:48:46
+ * @FilePath: /cesium-web-vue/src/components/toolbarGroup/analysis/sectionAnalysis.ts
  */
 import * as echarts from 'echarts/core';
 import {
@@ -19,9 +19,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { DrawPolyline, polylineOptions } from '@/utils/vue-utils/draw/drawUtils';
 import { CESIUM_3D_TILE, TERRAIN } from '@/constant/index';
 
-import { HeightReference, Viewer, Cartesian3, sampleTerrainMostDetailed, Cartographic, createWorldTerrain, EllipsoidGeodesic, Entity, VerticalOrigin, NearFarScalar, ConstantPositionProperty } from 'cesium';
-import CMath from 'cesium/Source/Core/Math';
-
+import { Math as CMath, HeightReference, Viewer, Cartesian3, sampleTerrainMostDetailed, Cartographic, createWorldTerrain, EllipsoidGeodesic, Entity, VerticalOrigin, NearFarScalar, ConstantPositionProperty } from 'cesium';
 
 echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition, ToolboxComponent, TooltipComponent, DatasetComponent]);
 
