@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-06-02 17:21:44
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-01-10 10:48:40
+ * @LastEditTime: 2022-03-28 20:33:44
  * @FilePath: /cesium-web-vue/.eslintrc.js
  */
 
@@ -13,7 +13,8 @@ module.exports = {
   },
   'extends': [
     'plugin:vue/vue3-essential',
-    'eslint:recommended',
+    'plugin:vue/vue3-recommended',
+    // 'eslint:recommended',
     '@vue/typescript/recommended'
   ],
   parserOptions: {
