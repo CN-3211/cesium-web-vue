@@ -1,7 +1,7 @@
 <!--
  * @Date: 2021-06-02 17:39:05
  * @LastEditors: huangzh873
- * @LastEditTime: 2022-01-10 17:31:43
+ * @LastEditTime: 2022-03-28 09:33:46
  * @FilePath: /cesium-web-vue/src/views/index.vue
 -->
 <template>
@@ -17,7 +17,8 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref, Ref, provide, reactive, markRaw, defineComponent } from 'vue';
+import { onMounted, ref, provide, reactive, markRaw, defineComponent } from 'vue';
+import type { Ref } from 'vue'
 
 import transform from "@/utils/vue-utils/transform/transform";
 import HViewer from '@/components/viewer/hViewer.vue'
